@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <body style="background: #333">
+    <style>
+      w-knob::part(knob-svg-path) {
+        fill: #000;
+        stroke: #556;
+        stroke-width: 2px;
+      }
+      w-knob::part(knob-circle) {
+        background: #666;
+        border-top: 1.5px solid #fff;
+        border-left: 1.5px solid #fff;
+        box-shadow: inset -1px -1px 3px -1px #333;
+        width: 27px;
+        height: 27px;
+        border-radius: 100%;
+        z-index: 1000;
+      }
+      w-param {
+        display: inline-flex;
+        flex-flow: column nowrap;
+        align-items: center;
+        justify-content: center;
+      }
+      w-param::part(param-number) {
+        background: #000;
+        color: #fff;
+        width: 6ch;
+        font-family: monospace;
+        text-align: center;
+      }
+      w-param::part(param-range) {
+        display: none;
+      }
+    </style>
+    <w-context id="wa">
+      <w-worklet name="noise" src="./noise.js">
+
+        <w-param name="volume" slope="0.5" precision="1">
+          <w-knob shape="dodecagon" size="150"></w-knob>
+          <w-knob shape="decagon" size="90"></w-knob>
+          <w-knob shape="octagon" size="90"></w-knob>
+          <w-knob shape="hexagon" size="150"></w-knob>
+        </w-param>
+
+        <w-destination></w-destination>
+      </w-worklet>
+    </w-context>
+
+    <script type="module">
+      const define = (ns, elements) =>
+        Promise.all(
+          elements.map(async ([name, src]) => [name, await import(src)])
+        ).then((modules) =>
+          modules.map(([name, mod]) =>
+            customElements.define(ns + '-' + name, mod.default)
+          )
+        )
+
+      await define('w', [
+        ['context', './components/context.js'],
+        ['worklet', './components/worklet.js'],
+        ['destination', './components/destination.js'],
+        ['param', './components/param.js'],
+        ['knob', './components/knob.js'],
+      ])
+    </script>
+  </body>
+</html>
