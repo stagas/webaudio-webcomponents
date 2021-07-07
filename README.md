@@ -7,6 +7,21 @@
 This repo is two things:
 
 1. A set of Web Components to create WebAudio graphs plus a set of GUI elements for parameter controlling and automation.
+
+```html
+<w-context id="wa">
+  <w-worklet name="noise" src="./noise.js">
+    <w-param name="volume" slope="0.5" precision="1">
+      <w-knob shape="dodecagon" size="150"></w-knob>
+      <w-knob shape="decagon" size="90"></w-knob>
+      <w-knob shape="octagon" size="90"></w-knob>
+      <w-knob shape="hexagon" size="150"></w-knob>
+    </w-param>
+    <w-destination></w-destination>
+  </w-worklet>
+</w-context>
+```
+
 2. A Web Components hook-based reactive component framework (similar to functional React) designed to support the WebAudio components with as little surface as possible, without sacrificing usability.
 Examples act as documentation: See [param.js](components/param.js) or [worklet.js](components/worklet.js).
 

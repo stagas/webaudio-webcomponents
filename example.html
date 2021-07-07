@@ -34,16 +34,15 @@
         display: none;
       }
     </style>
+
     <w-context id="wa">
       <w-worklet name="noise" src="./noise.js">
-
         <w-param name="volume" slope="0.5" precision="1">
           <w-knob shape="dodecagon" size="150"></w-knob>
           <w-knob shape="decagon" size="90"></w-knob>
           <w-knob shape="octagon" size="90"></w-knob>
           <w-knob shape="hexagon" size="150"></w-knob>
         </w-param>
-
         <w-destination></w-destination>
       </w-worklet>
     </w-context>
