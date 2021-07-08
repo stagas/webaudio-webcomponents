@@ -1,6 +1,6 @@
 # [wip] WebAudio WebComponents
 
-![alt:knobs](./knobs.png)
+![alt:components](./components.png)
 
 ## Description
 
@@ -11,12 +11,25 @@ This repo is two things:
 ```html
 <w-context id="wa">
   <w-worklet name="noise" src="./noise.js">
-    <w-param name="volume" slope="0.5" precision="1">
-      <w-knob shape="dodecagon" size="150"></w-knob>
-      <w-knob shape="decagon" size="90"></w-knob>
-      <w-knob shape="octagon" size="90"></w-knob>
-      <w-knob shape="hexagon" size="150"></w-knob>
-    </w-param>
+    <w-piano></w-piano>
+
+    <div style="display: flex; margin: 20px">
+      <w-param name="volume" precision="3">
+        <w-knob shape="octagon" size="90"></w-knob>
+        <w-knob shape="hexagon" size="150"></w-knob>
+      </w-param>
+
+      <w-param name="volume" precision="3">
+        <w-fader size="161"></w-fader>
+        <w-knob shape="hexagon" size="75"></w-knob>
+      </w-param>
+
+      <w-param name="volume" precision="3">
+        <w-knob shape="decagon" size="90"></w-knob>
+        <w-knob shape="dodecagon" size="150"></w-knob>
+      </w-param>
+    </div>
+
     <w-destination></w-destination>
   </w-worklet>
 </w-context>

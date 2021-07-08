@@ -24,6 +24,9 @@ export default create({
     scale: Function,
     normalize: Function,
     applyPrecision: Function,
+    mouseDown: false,
+    startY: Number,
+    startIndex: Number,
   },
 
   pins: { input: 'input[type=number]', range: 'input[type=range]' },
@@ -36,7 +39,7 @@ export default create({
         if (el) {
           if ('name' in el) {
             el.min = 0
-            el.max = 127
+            el.max = this.steps - 1
             el.name = this.name
           }
         }
@@ -267,6 +270,60 @@ export default create({
           this.moveStep(Math.round(e.deltaY * 0.06))
         })
         this.addEventListener('wheel', onwheel, { passive: false })
+      },
+      this.input,
+      this.range,
+      this.moveStep,
+    )
+
+    effect(() => {
+      this.input.addEventListener('mousedown', (e) => {
+        e.stopPropagation()
+      }, { capture: true })
+    }, this.input)
+
+    effect(
+      () => {
+        const onmousedown = callback((e) => {
+          if (!this.mouseDown) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.startY = e.clientY
+            this.startIndex = this.rangeIndex
+            this.mouseDown = true
+
+            const onmousemove = callback((e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              const y = this.startY - e.clientY
+              this.value =
+                this
+                  .stepValues[
+                    Math.max(
+                      0,
+                      Math.min(
+                        this.stepValues.length - 1,
+                        this.startIndex + (y * (100 / this.steps)) | 0,
+                      ),
+                    )
+                  ]
+            })
+
+            const onmouseup = callback(e => {
+              e.preventDefault()
+              e.stopPropagation()
+              this.mouseDown = false
+              console.log('UP!')
+              window.removeEventListener('mousemove', onmousemove, {
+                capture: true,
+              })
+            })
+
+            window.addEventListener('mouseup', onmouseup, { once: true })
+            window.addEventListener('mousemove', onmousemove, { capture: true })
+          }
+        })
+        this.addEventListener('mousedown', onmousedown)
       },
       this.input,
       this.range,

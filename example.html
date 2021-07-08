@@ -2,6 +2,11 @@
 <html>
   <body style="background: #333">
     <style>
+      w-worklet * {
+        align-items: center;
+        justify-content: space-around;
+        height: 100%;
+      }
       w-knob::part(knob-svg-path) {
         fill: #000;
         stroke: #556;
@@ -34,25 +39,40 @@
       w-param::part(param-range) {
         display: none;
       }
+      w-piano::part(piano-white) {
+        background: #111;
+      }
+      w-piano::part(piano-black) {
+        background: #666;
+        border-top: 1.5px solid #fff;
+        border-left: 1.5px solid #fff;
+      }
+      w-piano {
+        --pressed-white: #666;
+        --pressed-black: #111;
+      }
     </style>
 
     <w-context id="wa">
       <w-worklet name="noise" src="./noise.js">
-        <w-param name="volume" slope="0.5" precision="3">
-          <div style="display: flex; flex-flow: row wrap">
-            <div style="display: flex; flex-flow: column nowrap">
-              <w-knob shape="dodecagon" size="150"></w-knob>
-              <w-knob shape="decagon" size="90"></w-knob>
-              <w-knob shape="octagon" size="90"></w-knob>
-              <w-knob shape="hexagon" size="150"></w-knob>
-            </div>
-          </div>
-        </w-param>
+        <w-piano></w-piano>
 
-        <w-param name="volume" slope="1.5" precision="3">
-          <w-fader size="200"></w-fader>
-          <w-knob shape="hexagon" size="70"></w-knob>
-        </w-param>
+        <div style="display: flex; margin: 20px">
+          <w-param name="volume" precision="3">
+            <w-knob shape="octagon" size="90"></w-knob>
+            <w-knob shape="hexagon" size="150"></w-knob>
+          </w-param>
+
+          <w-param name="volume" precision="3">
+            <w-fader size="161"></w-fader>
+            <w-knob shape="hexagon" size="75"></w-knob>
+          </w-param>
+
+          <w-param name="volume" precision="3">
+            <w-knob shape="decagon" size="90"></w-knob>
+            <w-knob shape="dodecagon" size="150"></w-knob>
+          </w-param>
+        </div>
 
         <w-destination></w-destination>
       </w-worklet>
@@ -75,6 +95,7 @@
         ['param', './components/param.js'],
         ['knob', './components/knob.js'],
         ['fader', './components/fader.js'],
+        ['piano', './components/piano.js'],
       ])
     </script>
   </body>
