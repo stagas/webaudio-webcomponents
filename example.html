@@ -27,6 +27,7 @@
         align-items: center;
         justify-content: center;
         height: 100%;
+        overflow: auto;
       }
 
       /* knob */
@@ -94,8 +95,6 @@
 
     <w-context id="wa">
       <w-worklet name="noise" src="./noise.js">
-        <w-piano></w-piano>
-
         <div class="worklet-inner">
           <w-param name="volume" precision="3">
             <w-knob shape="octagon" size="90"></w-knob>
@@ -114,6 +113,8 @@
         </div>
 
         <w-destination></w-destination>
+
+        <w-piano></w-piano>
       </w-worklet>
     </w-context>
 

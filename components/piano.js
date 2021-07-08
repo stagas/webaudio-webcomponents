@@ -77,7 +77,7 @@ export default create({
           }
 
           .white {
-            height: calc(8vh + 7vw);
+            height: calc(8vh + 8vw);
             flex: 10;
             z-index: 1;
             background-color: #CBCBCB;
@@ -86,7 +86,7 @@ export default create({
           .black {
             z-index: 2;
             flex: 5;
-            height: calc(5.5vw + 4vh);
+            height: calc(6vw + 3.5vh);
             background-color: #101010;
           }
 
