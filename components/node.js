@@ -48,7 +48,7 @@ export const WebAudioNode = create({
   },
 
   connectInputs() {
-    for (const [, target, handler] of this.connectedInputs.splice(0)) {
+    for (const [, , target, handler] of this.connectedInputs.splice(0)) {
       target.removeEventListener('input', handler)
     }
     const targets = this.slotted
@@ -68,16 +68,23 @@ export const WebAudioNode = create({
         })
 
         const handler = () => {
-          const value = target.value
+          const value = +target.value
           p.setValueAtTime(value, context.currentTime + 0.05)
-          this.connectedInputs.filter(([param, input]) =>
-            param.name === p.name && input !== target
-          ).forEach(([, input]) => (input.value = value))
+          const conns = this.connectedInputs.filter(([name, param, input]) =>
+            name == target.name && input !== target
+          )
+          // console.log('conns', conns, target.name)
+          for (const conn of conns) {
+            const [_name, _param, input] = conn
+            if (value != input.value) {
+              input.value = value
+            }
+          }
         }
 
         target.addEventListener('input', handler)
 
-        this.connectedInputs.push([p, target, handler])
+        this.connectedInputs.push([target.name, p, target, handler])
       }
     }
   },

@@ -64,7 +64,7 @@ export default create({
 
     effect(
       () => {
-        const normalValue = (this.value - this.min) / (this.max - this.min)
+        const normalValue = this.value / 127
 
         {
           this.faderTrack.setAttribute('d', `M 40 10 L 40 ${this.size - 10} z`)

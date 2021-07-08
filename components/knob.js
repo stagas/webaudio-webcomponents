@@ -79,8 +79,6 @@ export default create({
     size: 60,
     name: String,
     value: Number,
-    min: Number,
-    max: Number,
     symmetric: false,
   },
   props: {},
@@ -201,14 +199,12 @@ export default create({
 
         const shape = shapes[this.shape]
 
-        const rotate = -shape.minRange
-          + (((this.value - this.min) / (this.max - this.min)))
-            * (360 - shape.maxRange)
-
         createBlob({ element: this.path, ...shapes[this.shape] })
 
-        this.knob.style.transform = `rotate(${rotate}deg)`
-        const normalValue = ((this.value - this.min) / (this.max - this.min))
+        const normalValue = this.value / 127
+
+        this.knob.style.transform = `rotate(${-shape.minRange
+          + normalValue * (360 - shape.maxRange)}deg)`
 
         {
           const parts = ['M 50 50']

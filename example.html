@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <body style="background: #333">
-    <style>
+    <style id="globstyle">
       :root {
         --white: #fff;
         --grey: #666;
@@ -94,6 +94,8 @@
     </style>
 
     <w-context id="wa">
+      <!-- <w-audioplugin src="./vendor/tb303.js"></w-audioplugin> -->
+
       <w-worklet name="noise" src="./noise.js">
         <div class="worklet-inner">
           <w-param name="volume" precision="3">
@@ -101,7 +103,7 @@
             <w-knob shape="hexagon" size="150"></w-knob>
           </w-param>
 
-          <w-param name="volume" precision="3">
+          <w-param name="filter" precision="3">
             <w-fader size="200"></w-fader>
             <w-knob shape="hexagon" size="75"></w-knob>
           </w-param>
@@ -136,6 +138,7 @@
         ['knob', './components/knob.js'],
         ['fader', './components/fader.js'],
         ['piano', './components/piano.js'],
+        ['audioplugin', './components/audioplugin.js'],
       ])
     </script>
   </body>

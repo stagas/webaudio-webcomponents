@@ -34,18 +34,6 @@ export default create({
   didKeyDown: false,
 
   component() {
-    effect(() => {
-      this.slotted.forEach(el => {
-        if (el) {
-          if ('name' in el) {
-            el.min = 0
-            el.max = this.steps - 1
-            el.name = this.name
-          }
-        }
-      })
-    }, this.slotted)
-
     effect.once(
       () => {
         this.render `
@@ -338,8 +326,8 @@ export default create({
         this.slotted.forEach(el => {
           if (el) {
             if ('name' in el) {
-              el.min = this.min
-              el.max = this.max
+              el.min = 0
+              el.max = 127
               el.value = this.rangeIndex
             }
           }

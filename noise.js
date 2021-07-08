@@ -4,7 +4,13 @@ class Noise extends AudioWorkletProcessor {
       name: 'volume',
       defaultValue: 30,
       minValue: 0,
-      maxValue: 100,
+      maxValue: 150,
+      automationRate: 'a-rate',
+    }, {
+      name: 'filter',
+      defaultValue: 0.5,
+      minValue: 0,
+      maxValue: 1,
       automationRate: 'a-rate',
     }]
   }
