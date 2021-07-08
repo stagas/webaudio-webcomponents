@@ -7,7 +7,38 @@ export default create({
 
   props: { notePressed: Number },
 
-  pins: { outer: '#outer', keyboard: '[part=keyboard]' },
+  pins: { outer: '#outer', textarea: 'textarea', keyboard: '[part=keyboard]' },
+
+  turnOnKey(note) {
+    // this.turnOffKey(this.notePressed)
+    try {
+      this.get(`[data-note="${note}"]`).classList.add('pressed')
+    }
+    catch {
+      //
+    }
+    // this.notePressed = note
+  },
+
+  turnOffKey(note) {
+    try {
+      this.get(`[data-note="${note}"]`).classList.remove('pressed')
+    }
+    catch {
+      //
+    }
+  },
+
+  getNote(key) {
+    key = key.toLowerCase()
+    let note = "zsxdcvgbhnjm,l.;/'\\".indexOf(key)
+    if (note < 0) {
+      note = 'q2w3er5t6y7ui9o0p[=]'.indexOf(key)
+      if (note >= 0) note += 12
+      else return -1
+    }
+    return note
+  },
 
   component() {
     effect(() => {
@@ -19,6 +50,7 @@ export default create({
           }
 
           #outer {
+            position: relative;
             user-select: none;
             height: 100%;
             width: 100%;
@@ -70,7 +102,24 @@ export default create({
             background: var(--pressed-black) !important;
           }
 
+          textarea {
+            box-sizing: border-box;
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            top: 0;
+            background: none;
+            color: #fff;
+            z-index: 0;
+            caret: none;
+            resize: none;
+          }
+
           #keyboard {
+            position: relative;
             display: flex;
             flex-flow: row nowrap;
             flex: 1;
@@ -81,6 +130,7 @@ export default create({
         </style>
 
         <div id="outer">
+          <textarea></textarea>
           <div id="keyboard" part="keyboard">
             ${
         Array(
@@ -118,37 +168,41 @@ export default create({
     }, this.outer)
 
     effect(() => {
+      this.textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') return
+        e.preventDefault()
+        e.stopPropagation()
+        const note = this.getNote(e.key)
+        if (note >= 0) this.turnOnKey(note)
+      })
+      this.textarea.addEventListener('keyup', (e) => {
+        if (e.key === 'Tab') return
+        e.preventDefault()
+        e.stopPropagation()
+        const note = this.getNote(e.key)
+        if (note >= 0) this.turnOffKey(note)
+      })
+    }, this.textarea)
+
+    effect(() => {
       this.keyboard.addEventListener(
         'mousedown',
         callback((e) => {
           e.preventDefault()
           e.stopPropagation()
 
+          this.textarea.focus()
           const onmousemove = callback((e) => {
             const note = e.target.dataset.note
             if (note) {
-              try {
-                this.get(`[data-note="${this.notePressed}"]`).classList.remove(
-                  'pressed',
-                )
-              }
-              catch {
-                //
-              }
+              this.turnOffKey(this.notePressed)
+              this.turnOnKey(note)
               this.notePressed = note
-              e.target.classList.add('pressed')
             }
           })
 
           const onmouseup = callback((e) => {
-            try {
-              this.get(`[data-note="${this.notePressed}"]`).classList.remove(
-                'pressed',
-              )
-            }
-            catch {
-              //
-            }
+            this.turnOffKey(this.notePressed)
             this.keyboard.removeEventListener('mousemove', onmousemove)
           })
 
