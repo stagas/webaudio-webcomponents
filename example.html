@@ -15,9 +15,10 @@
         width: 27px;
         height: 27px;
         border-radius: 100%;
-        z-index: 1000;
+        z-index: 1;
       }
       w-param {
+        position: relative;
         display: inline-flex;
         flex-flow: column nowrap;
         align-items: center;
@@ -37,12 +38,22 @@
 
     <w-context id="wa">
       <w-worklet name="noise" src="./noise.js">
-        <w-param name="volume" slope="0.5" precision="1">
-          <w-knob shape="dodecagon" size="150"></w-knob>
-          <w-knob shape="decagon" size="90"></w-knob>
-          <w-knob shape="octagon" size="90"></w-knob>
-          <w-knob shape="hexagon" size="150"></w-knob>
+        <w-param name="volume" slope="0.5" precision="3">
+          <div style="display: flex; flex-flow: row wrap">
+            <div style="display: flex; flex-flow: column nowrap">
+              <w-knob shape="dodecagon" size="150"></w-knob>
+              <w-knob shape="decagon" size="90"></w-knob>
+              <w-knob shape="octagon" size="90"></w-knob>
+              <w-knob shape="hexagon" size="150"></w-knob>
+            </div>
+          </div>
         </w-param>
+
+        <w-param name="volume" slope="1.5" precision="3">
+          <w-fader size="200"></w-fader>
+          <w-knob shape="hexagon" size="70"></w-knob>
+        </w-param>
+
         <w-destination></w-destination>
       </w-worklet>
     </w-context>
@@ -63,6 +74,7 @@
         ['destination', './components/destination.js'],
         ['param', './components/param.js'],
         ['knob', './components/knob.js'],
+        ['fader', './components/fader.js'],
       ])
     </script>
   </body>

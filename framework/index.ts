@@ -2,7 +2,7 @@
 
 import { dom } from './dom.ts'
 import { effect, quiet, state, Types, unwrap, wrap } from './state.ts'
-import { bind, patchMethods, top } from './util.ts'
+import { bind, flatten, patchMethods, top } from './util.ts'
 
 export * from './state.ts'
 export * from './util.ts'
@@ -107,7 +107,7 @@ class Base extends HTMLElement {
   static observedAttributes: string[]
 
   html!: string
-  slotted!: Array<Element>
+  slotted!: Node[]
   params: ComponentParams
   state: ComponentParams
 
@@ -150,18 +150,16 @@ class Base extends HTMLElement {
     if (ctor.slot) this.createSlot()
 
     effect(() => {
-      wrap(() => {
-        this.root.innerHTML = this.html
+      this.root.innerHTML = this.html
 
-        for (const [key, selector] of Object.entries(params.pins ?? {})) {
-          self[key] = this.get(selector as string)
-        }
+      for (const [key, selector] of Object.entries(params.pins ?? {})) {
+        self[key] = this.get(selector as string)
+      }
 
-        const slot = this.root.querySelector('slot')
-        if (slot) {
-          this.useSlot(slot)
-        }
-      })
+      const slot = this.root.querySelector('slot')
+      if (slot) {
+        this.useSlot(slot)
+      }
     }, this.html)
   }
 
@@ -171,24 +169,24 @@ class Base extends HTMLElement {
   }
 
   render(parts: string[], ...values: any[]) {
-    wrap(() => {
-      dom(this.root, bind(this)(parts, ...values), this)
+    dom(this.root, bind(this)(parts, ...values), this)
 
-      wrap(() => {
-        for (const [key, selector] of Object.entries(this.params.pins ?? {})) {
-          (this as any)[key] = this.get(selector as string)
-        }
-      })
+    for (const [key, selector] of Object.entries(this.params.pins ?? {})) {
+      ;(this as any)[key] = this.get(selector as string)
+    }
 
-      const slot = this.root.querySelector('slot')
-      if (slot) {
-        this.useSlot(slot)
-      }
-    })
+    const slot = this.root.querySelector('slot')
+    if (slot) {
+      this.useSlot(slot)
+    }
   }
 
   useSlot(slot: HTMLSlotElement) {
-    const elements = () => slot.assignedElements({ flatten: true }).slice()
+    const elements = () =>
+      slot.assignedElements({ flatten: true }).slice().map(el =>
+        [el, flatten(el)].flat()
+      ).flat()
+
     if (slot.parentNode !== this.root) {
       this.root.appendChild(slot)
     }

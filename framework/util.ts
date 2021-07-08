@@ -53,3 +53,25 @@ export const el = (tagName: string, content: any) => {
   }, content)
   return str
 }
+
+const { SHOW_DOCUMENT_FRAGMENT, SHOW_ELEMENT, SHOW_TEXT } = NodeFilter
+
+export function* traverse(node: Node | null) {
+  if (node) {
+    const tree = document.createTreeWalker(
+      node,
+      SHOW_DOCUMENT_FRAGMENT | SHOW_ELEMENT | SHOW_TEXT,
+      null,
+      false,
+    )
+
+    // deno-lint-ignore no-cond-assign
+    while (node = tree.nextNode()) {
+      yield node
+    }
+  }
+}
+
+export const flatten = (node: Node | null) => {
+  return [...traverse(node)]
+}

@@ -34,9 +34,11 @@ export default create({
     effect(() => {
       this.slotted.forEach(el => {
         if (el) {
-          el.min = 0
-          el.max = 127
-          el.name = this.name
+          if ('name' in el) {
+            el.min = 0
+            el.max = 127
+            el.name = this.name
+          }
         }
       })
     }, this.slotted)
@@ -274,9 +276,19 @@ export default create({
     effect(
       () => {
         this.range.value = this.rangeIndex
-        this.slotted.forEach(el => el.value = this.rangeIndex)
+        this.slotted.forEach(el => {
+          if (el) {
+            if ('name' in el) {
+              el.min = this.min
+              el.max = this.max
+              el.value = this.rangeIndex
+            }
+          }
+        })
       },
       this.slotted,
+      this.min,
+      this.max,
       this.range,
       this.rangeIndex,
     )
