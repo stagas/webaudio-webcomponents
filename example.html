@@ -28,6 +28,9 @@
         justify-content: center;
         height: 100%;
       }
+
+      /* knob */
+
       w-knob::part(knob-svg-path) {
         fill: var(--black);
         stroke: var(--grey);
@@ -45,6 +48,8 @@
         z-index: 1;
       }
 
+      /* param */
+
       w-param {
         position: relative;
         display: flex;
@@ -53,7 +58,6 @@
         align-items: center;
         justify-content: center;
       }
-
       w-param::part(param-name) {
         font-size: 17pt;
         font-family: sans-serif;
@@ -70,8 +74,12 @@
       w-param::part(param-range) {
         display: none;
       }
+
+      /* piano */
+
       w-piano::part(piano-white) {
         background: var(--black);
+        border-right: 4px solid var(--black);
       }
       w-piano::part(piano-black) {
         background: var(--grey);
