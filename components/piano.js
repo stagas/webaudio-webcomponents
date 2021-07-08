@@ -3,7 +3,7 @@ import { callback, create, effect } from '../dist/index.js'
 export default create({
   class: 'piano',
 
-  attrs: { octaves: 3 },
+  attrs: { halfOctaves: 4 },
 
   props: { notePressed: Number },
 
@@ -11,7 +11,7 @@ export default create({
 
   component() {
     effect(() => {
-      this.html = `
+      this.render `
         <style>
           :host {
             --pressed-white: #e44;
@@ -45,7 +45,7 @@ export default create({
           }
 
           .white {
-            height: 15vw;
+            height: calc(8vh + 7vw);
             flex: 10;
             z-index: 1;
             background-color: #CBCBCB;
@@ -54,12 +54,12 @@ export default create({
           .black {
             z-index: 2;
             flex: 5;
-            height: 9.2vw;
+            height: calc(5.5vw + 4vh);
             background-color: #101010;
           }
 
           .black {
-            margin: 0 -${[4, 2, 1.5, 1][this.octaves - 1]}vw;
+            margin: 0 -${[10, 4, 3, 2, 2][this.halfOctaves - 1] || 1.3}vw;
           }
 
           .pressed.white {
@@ -75,18 +75,29 @@ export default create({
             flex-flow: row nowrap;
             flex: 1;
           }
+          #keyboard .key:last-child {
+            border-right: none !important;
+          }
         </style>
 
         <div id="outer">
           <div id="keyboard" part="keyboard">
             ${
-        Array(12 * this.octaves).fill(0).map((_, i) => {
+        Array(
+          6 * this.halfOctaves + (this.halfOctaves % 2 === 0
+            ? 1
+            : this.halfOctaves % 1 === 0
+            ? -1
+            : 1),
+        ).fill(0).map((_, i) => {
           const ii = i % 12
           const bw = 'wbwbwwbwbwbw'[ii] === 'b'
           const nt = 'ccddeffggaab'[ii]
           const sh = '-s-s--s-s-s-'[ii] === 's'
           return `<div data-note="${i}" part="${
-            bw ? 'piano-black' : 'piano-white'
+            bw
+              ? 'piano-black'
+              : 'piano-white'
           }" class="note key ${bw ? 'black' : 'white'} ${nt}">${nt}${
             sh ? '#' : ''
           }</div>`
@@ -95,12 +106,12 @@ export default create({
           </div>
         </div>
       `
-    }, this.octaves)
+    }, this.halfOctaves)
 
     effect(() => {
       const resizeObserver = new ResizeObserver(callback(() => {
-        this.octaves = Math.round(
-          (this.outer.getBoundingClientRect().width / 32) / 12,
+        this.halfOctaves = Math.round(
+          (this.outer.getBoundingClientRect().width / 28) / 6,
         )
       }))
       resizeObserver.observe(this.outer)
