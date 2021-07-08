@@ -194,7 +194,11 @@ export default create({
     effect(
       () => {
         this.input.onkeydown = callback((e) => {
-          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') return
+          if (
+            e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Tab'
+          ) {
+            return
+          }
           if (e.key === 'Enter') {
             this.value = this.applyPrecision(this.input.value)
             this.input.value = this.value
