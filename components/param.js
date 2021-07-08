@@ -52,6 +52,7 @@ export default create({
           <slot></slot>
           <input part="param-number" type="number" role="slider">
           <input part="param-range" type="range" role="slider" min="0" max="127" step="1">
+          <div part="param-name">${this.name}</div>
         `
       },
       this.rangeIndex,
@@ -194,9 +195,7 @@ export default create({
     effect(
       () => {
         this.input.onkeydown = callback((e) => {
-          if (
-            e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Tab'
-          ) {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Tab') {
             return
           }
           if (e.key === 'Enter') {
@@ -317,7 +316,6 @@ export default create({
               e.preventDefault()
               e.stopPropagation()
               this.mouseDown = false
-              console.log('UP!')
               window.removeEventListener('mousemove', onmousemove, {
                 capture: true,
               })

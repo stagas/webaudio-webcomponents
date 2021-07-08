@@ -24,9 +24,13 @@ export default create({
       () => {
         this.html = `
         <style>
-          #fader {
+          [part=fader-outer] {
             width: 80px;
-            height: ${this.size}px;
+            height: 200px;
+          }
+          [part=fader-svg] {
+            width: 80px;
+            height: 100%;
           }
           #outer {
             position: relative;
@@ -45,8 +49,8 @@ export default create({
           }
         </style>
 
-        <div id="outer">
-          <svg id="fader" viewBox="0 0 80 ${this.size}">
+        <div id="outer" part="fader-outer">
+          <svg id="fader" part="fader-svg" preserveAspectRatio="none" viewBox="0 0 80 ${this.size}">
             <path part="fader-track"></path>
             <path part="fader-lines"></path>
             <path part="fader-tip"></path>

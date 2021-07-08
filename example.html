@@ -2,9 +2,23 @@
 <html>
   <body style="background: #333">
     <style>
-      w-worklet * {
+      html,
+      body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      w-worklet {
+        display: flex;
+        flex-flow: column nowrap;
+        flex: 1;
+        height: 100%;
+      }
+      .worklet-inner {
+        display: flex;
+        flex-flow: row nowrap;
         align-items: center;
-        justify-content: space-around;
+        justify-content: center;
         height: 100%;
       }
       w-knob::part(knob-svg-path) {
@@ -12,6 +26,7 @@
         stroke: #556;
         stroke-width: 2px;
       }
+
       w-knob::part(knob-circle) {
         background: #666;
         border-top: 1.5px solid #fff;
@@ -22,12 +37,21 @@
         border-radius: 100%;
         z-index: 1;
       }
+
       w-param {
+        /* background: blue; */
         position: relative;
-        display: inline-flex;
+        display: flex;
+        height: 100%;
         flex-flow: column nowrap;
         align-items: center;
         justify-content: center;
+      }
+      w-param::part(param-name) {
+        font-size: 17pt;
+        font-family: sans-serif;
+        color: #aaa;
+        margin: 1em;
       }
       w-param::part(param-number) {
         background: #000;
@@ -57,14 +81,14 @@
       <w-worklet name="noise" src="./noise.js">
         <w-piano></w-piano>
 
-        <div style="display: flex; margin: 20px">
+        <div class="worklet-inner">
           <w-param name="volume" precision="3">
             <w-knob shape="octagon" size="90"></w-knob>
             <w-knob shape="hexagon" size="150"></w-knob>
           </w-param>
 
           <w-param name="volume" precision="3">
-            <w-fader size="161"></w-fader>
+            <w-fader size="200"></w-fader>
             <w-knob shape="hexagon" size="75"></w-knob>
           </w-param>
 
