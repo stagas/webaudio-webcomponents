@@ -2,6 +2,13 @@
 <html>
   <body style="background: #333">
     <style>
+      :root {
+        --white: #fff;
+        --grey: #666;
+        --dark: #333;
+        --light: #aaa;
+        --black: #030303;
+      }
       html,
       body {
         height: 100%;
@@ -22,16 +29,16 @@
         height: 100%;
       }
       w-knob::part(knob-svg-path) {
-        fill: #000;
-        stroke: #556;
+        fill: var(--black);
+        stroke: var(--grey);
         stroke-width: 2px;
       }
 
       w-knob::part(knob-circle) {
-        background: #666;
-        border-top: 1.5px solid #fff;
-        border-left: 1.5px solid #fff;
-        box-shadow: inset -1px -1px 3px -1px #333;
+        background: var(--grey);
+        border-top: 1.5px solid var(--white);
+        border-left: 1.5px solid var(--white);
+        box-shadow: inset -1px -1px 3px -1px var(--dark);
         width: 27px;
         height: 27px;
         border-radius: 100%;
@@ -39,7 +46,6 @@
       }
 
       w-param {
-        /* background: blue; */
         position: relative;
         display: flex;
         height: 100%;
@@ -47,15 +53,16 @@
         align-items: center;
         justify-content: center;
       }
+
       w-param::part(param-name) {
         font-size: 17pt;
         font-family: sans-serif;
-        color: #aaa;
+        color: var(--light);
         margin: 1em;
       }
       w-param::part(param-number) {
-        background: #000;
-        color: #fff;
+        background: var(--black);
+        color: var(--white);
         width: 6ch;
         font-family: monospace;
         text-align: center;
@@ -64,16 +71,16 @@
         display: none;
       }
       w-piano::part(piano-white) {
-        background: #111;
+        background: var(--black);
       }
       w-piano::part(piano-black) {
-        background: #666;
-        border-top: 1.5px solid #fff;
-        border-left: 1.5px solid #fff;
+        background: var(--grey);
+        border-top: 1.5px solid var(--white);
+        border-left: 1.5px solid var(--white);
       }
       w-piano {
-        --pressed-white: #666;
-        --pressed-black: #111;
+        --pressed-white: var(--grey);
+        --pressed-black: var(--black);
       }
     </style>
 
