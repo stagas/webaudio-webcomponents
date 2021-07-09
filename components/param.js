@@ -279,6 +279,9 @@ export default create({
       this.input.addEventListener('mousedown', (e) => {
         e.stopPropagation()
       }, { capture: true })
+      this.input.addEventListener('touchstart', (e) => {
+        e.stopPropagation()
+      }, { capture: true })
     }, this.input)
 
     effect(
@@ -321,6 +324,43 @@ export default create({
             window.addEventListener('mousemove', onmousemove, { capture: true })
           }
         })
+        const ontouchmove = callback((e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          const y = this.startY - e.touches[0].clientY
+          this.value =
+            this
+              .stepValues[
+                Math.max(
+                  0,
+                  Math.min(
+                    this.stepValues.length - 1,
+                    this.startIndex + (y * (100 / this.steps)) | 0,
+                  ),
+                )
+              ]
+        })
+        const ontouchstart = callback((e) => {
+          if (!this.mouseDown) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.startY = e.touches[0].clientY
+            this.startIndex = this.rangeIndex
+            this.mouseDown = true
+
+            window.addEventListener('touchmove', ontouchmove, {
+              passive: false,
+            })
+
+            window.addEventListener('touchend', () => {
+              this.mouseDown = false
+              window.removeEventListener('touchmove', ontouchmove)
+            }, { once: true })
+
+            ontouchmove(e)
+          }
+        })
+        this.addEventListener('touchstart', ontouchstart, { passive: false })
         this.addEventListener('mousedown', onmousedown)
       },
       this.input,

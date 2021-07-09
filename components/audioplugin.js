@@ -23,11 +23,11 @@ export default create({
           </style>
 
           <w-worklet id="worklet" name="${plugin.name}" src="${this.src.value}">
-          <div class="worklet-inner">
-          ${
+            <div class="worklet-inner">
+            ${
           plugin.parameters.map(p => `
-            <w-param name="${p.name}" slope="${p.slope}">
-              <w-knob shape="${
+              <w-param name="${p.name}" slope="${p.slope}">
+                <w-knob shape="${
             [
               'hexagon',
               'octagon',
@@ -35,12 +35,12 @@ export default create({
               'dodecagon',
             ][Math.random() * 4 | 0]
           }" size="${80 + (Math.random() * 4 | 0) * 10}"></w-knob>
-            </w-param>
-            `).join('')
+              </w-param>
+              `).join('')
         }
-        </div>
-        <w-piano></w-piano>
-        <w-destination></w-destination>
+          </div>
+          <w-piano></w-piano>
+          <w-destination></w-destination>
         </w-worklet>
         `
       }),

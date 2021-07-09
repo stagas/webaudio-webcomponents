@@ -11,7 +11,7 @@ export default create({
 
   props: { notePressed: Number },
 
-  pins: { outer: '#outer', textarea: 'textarea', keyboard: '[part=keyboard]' },
+  pins: { outer: '#outer', button: 'button', keyboard: '[part=keyboard]' },
 
   turnOnKey(note) {
     try {
@@ -116,7 +116,7 @@ export default create({
             background: var(--pressed-black) !important;
           }
 
-          textarea {
+          button {
             box-sizing: border-box;
             pointer-events: none;
             width: 100%;
@@ -144,7 +144,7 @@ export default create({
         </style>
 
         <div id="outer">
-          <textarea></textarea>
+          <button></button>
           <div id="keyboard" part="keyboard">
             ${
         Array(
@@ -182,21 +182,21 @@ export default create({
     }, this.outer)
 
     effect(() => {
-      this.textarea.addEventListener('keydown', (e) => {
+      this.button.addEventListener('keydown', (e) => {
         if (e.key === 'Tab') return
         e.preventDefault()
         e.stopPropagation()
         const note = this.getNote(e.key)
         if (note >= 0) this.turnOnKey(note)
       })
-      this.textarea.addEventListener('keyup', (e) => {
+      this.button.addEventListener('keyup', (e) => {
         if (e.key === 'Tab') return
         e.preventDefault()
         e.stopPropagation()
         const note = this.getNote(e.key)
         if (note >= 0) this.turnOffKey(note)
       })
-    }, this.textarea)
+    }, this.button)
 
     effect(() => {
       this.keyboard.addEventListener(
@@ -205,7 +205,7 @@ export default create({
           e.preventDefault()
           e.stopPropagation()
 
-          this.textarea.focus()
+          this.button.focus()
           const onmousemove = callback((e) => {
             const note = e.target.dataset.note
             if (note) {
