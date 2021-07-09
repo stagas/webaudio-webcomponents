@@ -10,13 +10,13 @@ export default create({
   component() {
     audioContext ??= new AudioContext()
 
-    document.body.addEventListener('mousedown', () => {
+    window.addEventListener('mousedown', () => {
       audioContext.resume()
-    }, { once: true })
+    }, { once: true, capture: true, passive: false })
 
-    document.body.addEventListener('touchstart', () => {
+    window.addEventListener('touchstart', () => {
       audioContext.resume()
-    }, { once: true })
+    }, { once: true, capture: true, passive: false })
 
     effect(() => {
       for (const el of this.slotted) {

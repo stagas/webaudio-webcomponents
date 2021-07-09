@@ -61,6 +61,7 @@ export default create({
         this.piano.addEventListener(
           'midimessage',
           callback((e) => {
+            this.audioContext.resume()
             e.detail.receivedTime = performance.now()
             dispatchMIDIMessageEvent(this.worklet.audioNode, e.detail)
           }),
