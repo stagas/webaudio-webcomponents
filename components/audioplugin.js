@@ -54,7 +54,9 @@ export default create({
             return params.length === 0
               ? ''
               : `<fieldset part="param-group">${
-                group === 'other' ? '' : `<legend>${group}</legend>`
+                group === 'other'
+                  ? ''
+                  : `<legend part="param-group-legend">${group}</legend>`
               }` + params.map(p => `
               <w-param ${
                 p.symmetric ? 'symmetric' : ''
