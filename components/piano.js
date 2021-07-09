@@ -226,6 +226,34 @@ export default create({
           onmousemove(e)
         }),
       )
+
+      this.keyboard.addEventListener(
+        'touchstart',
+        callback((e) => {
+          e.preventDefault()
+          e.stopPropagation()
+
+          this.button.focus()
+          const ontouchmove = callback((e) => {
+            const note = e.target.dataset.note
+            if (note) {
+              this.turnOffKey(this.notePressed)
+              this.turnOnKey(note)
+              this.notePressed = note
+            }
+          })
+
+          const ontouchend = callback(() => {
+            this.turnOffKey(this.notePressed)
+            window.removeEventListener('touchmove', ontouchmove)
+          })
+
+          window.addEventListener('touchmove', ontouchmove)
+          window.addEventListener('touchend', ontouchend, { once: true })
+
+          ontouchmove(e)
+        }),
+      )
     }, this.keyboard)
 
     effect(() => {
