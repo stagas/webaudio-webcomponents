@@ -34,31 +34,19 @@ export default create({
   didKeyDown: false,
 
   component() {
-    // effect(
-    //   () => {
-    //     // console.log(this.name.value)
-    //     this.slotted.forEach(el => {
-    //       el.min = 0
-    //       el.max = 127
-    //       el.value = this.rangeIndex
-    //       //           el.min = this.min
-    //       // el.max = this.max
-    //       // el.value = this.rangeIndex
-    //       el.name = this.name
-    //     })
-    //   },
-    //   this.min,
-    //   this.max,
-    //   this.name,
-    //   this.value,
-    //   this.slotted,
-    // )
-
     effect(
       () => {
         this.render `
+          <style>
+            [part="param-number"] {
+              box-sizing: border-box;
+              padding: 3px;
+              margin: 0;
+            }
+          </style>
           <slot></slot>
-          <input part="param-number" type="number" role="slider">
+          <input part="param-number" type="number" role="slider" style="width:${Math
+          .max(this.min.toFixed(1).length, this.max.toFixed(1).length) + 3}ch">
           <input part="param-range" type="range" role="slider" min="0" max="127" step="1">
           <div part="param-name">${this.name}</div>
         `

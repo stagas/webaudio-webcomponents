@@ -16,6 +16,7 @@ export default create({
     effect(
       atomic(async () => {
         const plugin = await load(this.src)
+
         this.render `
           <style>
             ${document.getElementById('globstyle').innerHTML}
@@ -25,10 +26,7 @@ export default create({
           <div class="worklet-inner">
           ${
           plugin.parameters.map(p => `
-            <w-param name="${p.name}" precision="${Math.max(
-            p.minValue.toString().length,
-            p.maxValue.toString().length,
-          ) + 2}" slope="${p.slope}">
+            <w-param name="${p.name}" slope="${p.slope}">
               <w-knob shape="${
             [
               'hexagon',
@@ -53,9 +51,6 @@ export default create({
     effect(
       () => {
         this.worklet.audioContext = this.audioContext
-        // effect.once(() => {
-        //   this.audioNode = this.worklet.audioNode
-        // }, this.worklet.audioNode)
       },
       this.worklet,
       this.audioContext,
@@ -66,28 +61,13 @@ export default create({
         this.piano.addEventListener(
           'midimessage',
           callback((e) => {
-            e.detail.receivedTime = performance.now() // + 100
-            // this.worklet.dispatch('midimessage', e.detail)
-            // // if (this.worklet.audioNode) {
+            e.detail.receivedTime = performance.now()
             dispatchMIDIMessageEvent(this.worklet.audioNode, e.detail)
-            // // }
-            // // console.log(e.detail.data.slice())
           }),
         )
       },
       this.worklet,
       this.piano,
     )
-    // effect(
-    //   () => {
-    //     if (!this.workletModuleReady) return
-    //     if (this.audioNode) this.audioNode.disconnect()
-    //     this.audioNode = new AudioWorkletNode(this.audioContext, this.name)
-    //   },
-    //   this.workletModuleReady,
-    //   this.name,
-    //   this.src,
-    //   this.audioContext,
-    // )
   },
 })
