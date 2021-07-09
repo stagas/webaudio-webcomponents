@@ -15,19 +15,31 @@
         padding: 0;
         margin: 0;
       }
+
+      w-audioplugin {
+        /* display: flex;
+        flex-flow: column nowrap;
+        height: 100%;
+        width: 100%; */
+      }
+
       w-worklet {
         display: flex;
         flex-flow: column nowrap;
-        flex: 1;
+        /* flex-flow: column nowrap; */
+        /* flex: 1; */
         height: 100%;
+        align-items: center;
+        justify-content: space-around;
       }
       .worklet-inner {
         display: flex;
-        flex-flow: row nowrap;
+        flex-flow: row wrap;
         align-items: center;
-        justify-content: center;
-        height: 100%;
-        overflow: auto;
+        justify-content: space-around;
+        flex: 10;
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
       /* knob */
@@ -53,9 +65,8 @@
 
       w-param {
         position: relative;
-        display: flex;
-        height: 100%;
-        flex-flow: column nowrap;
+        display: inline-flex;
+        flex-flow: column wrap;
         align-items: center;
         justify-content: center;
       }
@@ -78,6 +89,10 @@
 
       /* piano */
 
+      w-piano {
+        flex: 1;
+        width: 100%;
+      }
       w-piano::part(piano-white) {
         background: var(--black);
         border-right: 4px solid var(--black);
@@ -94,10 +109,11 @@
     </style>
 
     <w-context id="wa">
-      <!-- <w-audioplugin src="./vendor/tb303.js"></w-audioplugin> -->
+      <w-audioplugin src="./vendor/tb303.js">
+      </w-audioplugin>
 
-      <w-worklet name="noise" src="./noise.js">
-        <div class="worklet-inner">
+        <!-- <w-worklet name="noise" src="./noise.js">
+          <div class="worklet-inner">
           <w-param name="volume" precision="3">
             <w-knob shape="octagon" size="90"></w-knob>
             <w-knob shape="hexagon" size="150"></w-knob>
@@ -117,7 +133,7 @@
         <w-destination></w-destination>
 
         <w-piano></w-piano>
-      </w-worklet>
+      </w-worklet> -->
     </w-context>
 
     <script type="module">

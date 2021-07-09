@@ -1,28 +1,42 @@
 import { callback, create, effect } from '../dist/index.js'
 
+const midiMessageEvent = new MIDIMessageEvent('midimessage', {
+  data: new Uint8Array([0, 0, 0]),
+})
+
 export default create({
   class: 'piano',
 
-  attrs: { halfOctaves: 4 },
+  attrs: { halfOctaves: 4, startOctave: 5 },
 
   props: { notePressed: Number },
 
   pins: { outer: '#outer', textarea: 'textarea', keyboard: '[part=keyboard]' },
 
   turnOnKey(note) {
-    // this.turnOffKey(this.notePressed)
     try {
-      this.get(`[data-note="${note}"]`).classList.add('pressed')
+      const el = this.get(`[data-note="${note}"]`)
+      if (el.classList.contains('pressed')) return
+      el.classList.add('pressed')
+      midiMessageEvent.data[0] = 0x90
+      midiMessageEvent.data[1] = (12 * this.startOctave) + Number(note)
+      midiMessageEvent.data[2] = 127
+      this.dispatch('midimessage', midiMessageEvent)
     }
     catch {
       //
     }
-    // this.notePressed = note
   },
 
   turnOffKey(note) {
     try {
-      this.get(`[data-note="${note}"]`).classList.remove('pressed')
+      const el = this.get(`[data-note="${note}"]`)
+      if (!el.classList.contains('pressed')) return
+      el.classList.remove('pressed')
+      midiMessageEvent.data[0] = 0x89
+      midiMessageEvent.data[1] = (12 * this.startOctave) + Number(note)
+      midiMessageEvent.data[2] = 0
+      this.dispatch('midimessage', midiMessageEvent)
     }
     catch {
       //
@@ -201,7 +215,7 @@ export default create({
             }
           })
 
-          const onmouseup = callback((e) => {
+          const onmouseup = callback(() => {
             this.turnOffKey(this.notePressed)
             this.keyboard.removeEventListener('mousemove', onmousemove)
           })

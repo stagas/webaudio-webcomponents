@@ -13,11 +13,11 @@ export default create({
     steps: 128,
     slope: 1,
     f32: false,
-    precision: Number,
+    precision: 3,
     symmetric: false,
   },
   props: {
-    rangeIndex: Number,
+    rangeIndex: 0,
     getValueIndex: Function,
     stepValues: Array,
     moveStep: Function,
@@ -34,7 +34,27 @@ export default create({
   didKeyDown: false,
 
   component() {
-    effect.once(
+    // effect(
+    //   () => {
+    //     // console.log(this.name.value)
+    //     this.slotted.forEach(el => {
+    //       el.min = 0
+    //       el.max = 127
+    //       el.value = this.rangeIndex
+    //       //           el.min = this.min
+    //       // el.max = this.max
+    //       // el.value = this.rangeIndex
+    //       el.name = this.name
+    //     })
+    //   },
+    //   this.min,
+    //   this.max,
+    //   this.name,
+    //   this.value,
+    //   this.slotted,
+    // )
+
+    effect(
       () => {
         this.render `
           <slot></slot>
@@ -326,6 +346,7 @@ export default create({
         this.slotted.forEach(el => {
           if (el) {
             if ('name' in el) {
+              // el.name = this.name
               el.min = 0
               el.max = 127
               el.value = this.rangeIndex

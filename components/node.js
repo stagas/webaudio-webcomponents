@@ -1,4 +1,4 @@
-import { atomic, create, effect, wrap } from '../dist/index.js'
+import { atomic, create, effect, flatten, wrap } from '../dist/index.js'
 export * from '../dist/index.js'
 
 export const WebAudioNode = create({
@@ -51,7 +51,8 @@ export const WebAudioNode = create({
     for (const [, , target, handler] of this.connectedInputs.splice(0)) {
       target.removeEventListener('input', handler)
     }
-    const targets = this.slotted
+
+    const targets = this.slotted.map(el => [el, el.childNodes]).flat()
     const params = this.audioNode.parameters
     const context = this.audioContext
 
@@ -70,10 +71,9 @@ export const WebAudioNode = create({
         const handler = () => {
           const value = +target.value
           p.setValueAtTime(value, context.currentTime + 0.05)
-          const conns = this.connectedInputs.filter(([name, param, input]) =>
+          const conns = this.connectedInputs.filter(([name, _param, input]) =>
             name == target.name && input !== target
           )
-          // console.log('conns', conns, target.name)
           for (const conn of conns) {
             const [_name, _param, input] = conn
             if (value != input.value) {
