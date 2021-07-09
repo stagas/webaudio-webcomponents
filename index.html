@@ -17,6 +17,30 @@
         --light: #aaa;
         --black: #030303;
       }
+
+      html {
+        scrollbar-color: var(--white);
+      }
+
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      ::-webkit-scrollbar-corner {
+        background-color: var(--grey);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: var(--grey);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--grey);
+      }
+      ::-webkit-scrollbar-thumb:active {
+        background-color: var(--grey);
+      }
+
       html,
       body {
         height: 100%;
@@ -25,29 +49,37 @@
       }
 
       w-audioplugin {
-        /* display: flex;
-        flex-flow: column nowrap;
-        height: 100%;
-        width: 100%; */
+        gap: 10px;
       }
 
+      w-audioplugin::part(param-group) {
+        flex: 0;
+        color: var(--black);
+        font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        border-color: var(--black);
+        min-width: 255px;
+        text-align: left;
+        display: flex;
+        flex-flow: row wrap;
+        align-items: flex-end;
+        justify-content: center;
+      }
       w-worklet {
         display: flex;
         flex-flow: column nowrap;
-        /* flex-flow: column nowrap; */
-        /* flex: 1; */
         height: 100%;
         align-items: center;
-        justify-content: space-around;
+        justify-content: center;
       }
       .worklet-inner {
         display: flex;
+        width: 100%;
+        height: 100%;
         flex-flow: row wrap;
         align-items: center;
         justify-content: space-around;
-        flex: 10;
         overflow-y: auto;
-        overflow-x: hidden;
+        overflow-x: auto;
       }
 
       /* knob */
@@ -117,8 +149,8 @@
     </style>
 
     <w-context id="wa">
-      <w-audioplugin src="./vendor/tb303.js">
-      </w-audioplugin>
+      <w-audioplugin src="./vendor/drummer.js"></w-audioplugin>
+      <w-audioplugin src="./vendor/tb303.js"></w-audioplugin>
 
         <!-- <w-worklet name="noise" src="./noise.js">
           <div class="worklet-inner">

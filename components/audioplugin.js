@@ -17,6 +17,31 @@ export default create({
       atomic(async () => {
         const plugin = await load(this.src)
 
+        const groups = new Map()
+
+        groups.set('other', [])
+
+        plugin.parameters.forEach(p => {
+          const [first, ...rest] = p.name.split(' ')
+
+          if (groups.has(first)) {
+            groups.get(first).push(p)
+          }
+          else {
+            groups.set(first, [p])
+          }
+        })
+
+        const groupItems = [...groups].filter(([g, params]) => {
+          if (params.length === 1) {
+            groups.get('other').push(params[0])
+            return false
+          }
+          else {
+            return true
+          }
+        })
+
         this.render `
           <style>
             ${document.getElementById('globstyle').innerHTML}
@@ -25,18 +50,24 @@ export default create({
           <w-worklet id="worklet" name="${plugin.name}" src="${this.src.value}">
             <div class="worklet-inner">
             ${
-          plugin.parameters.map(p => `
-              <w-param name="${p.name}" slope="${p.slope}">
+          groupItems.map(([group, params]) => {
+            return params.length === 0
+              ? ''
+              : `<fieldset part="param-group">${
+                group === 'other' ? '' : `<legend>${group}</legend>`
+              }` + params.map(p => `
+              <w-param name="${p.name}" group="${group}" slope="${p.slope}">
                 <w-knob shape="${
-            [
-              'hexagon',
-              'octagon',
-              'decagon',
-              'dodecagon',
-            ][Math.random() * 4 | 0]
-          }" size="${80 + (Math.random() * 4 | 0) * 10}"></w-knob>
+                [
+                  'hexagon',
+                  'octagon',
+                  'decagon',
+                  'dodecagon',
+                ][Math.random() * 4 | 0]
+              }" size="${65 + (Math.random() * 3 | 0) * 10}"></w-knob>
               </w-param>
-              `).join('')
+              `).join('') + '</fieldset>'
+          }).join('')
         }
           </div>
           <w-piano></w-piano>
