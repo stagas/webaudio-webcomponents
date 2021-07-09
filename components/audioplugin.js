@@ -56,8 +56,10 @@ export default create({
               : `<fieldset part="param-group">${
                 group === 'other' ? '' : `<legend>${group}</legend>`
               }` + params.map(p => `
-              <w-param name="${p.name}" group="${group}" slope="${p.slope}">
-                <w-knob shape="${
+              <w-param ${
+                p.symmetric ? 'symmetric' : ''
+              }  name="${p.name}" group="${group}" slope="${p.slope}">
+                <w-knob ${p.symmetric ? 'symmetric' : ''} shape="${
                 [
                   'hexagon',
                   'octagon',

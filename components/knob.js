@@ -98,8 +98,6 @@ export default create({
         <style>
           #knob {
             position: absolute;
-            width: ${this.size}px;
-            height: ${this.size}px;
           }
           #rays {
             position: absolute;
@@ -122,7 +120,7 @@ export default create({
             position: relative;
             display: inline-flex;
             width: ${this.size}px;
-            height: ${this.size}px;
+            height: 75px;
             align-items: center;
             justify-content: center;
           }
@@ -206,7 +204,9 @@ export default create({
         this.knob.style.transform = `rotate(${-shape.minRange
           + normalValue * (360 - shape.maxRange)}deg)`
 
-        {
+        const numOfRays = 64
+
+        const draw = (shape, fn) => {
           const parts = ['M 50 50']
           const gap = (shape.minRays * (Math.PI / 180))
           const rangeEnd = (shape.maxRays * Math.PI / 180)
@@ -214,28 +214,10 @@ export default create({
           const rangeBegin = circle + rangeEnd
           for (
             let i = rangeBegin;
-            i > rangeBegin - circle * normalValue;
-            i -= (2 * Math.PI / 64)
+            i >= rangeBegin - circle;
+            i -= (2 * Math.PI / numOfRays)
           ) {
-            const x = Math.sin(i) * 38
-            const y = Math.cos(i) * 38
-            parts.push(`M ${50 + Math.sin(i) * 30} ${50 + Math.cos(i) * 30}`)
-            parts.push('L ' + (50 + x) + ' ' + (50 + y))
-          }
-          parts.push('z')
-          this.raypath.setAttribute('d', parts.join(' '))
-        }
-
-        {
-          const parts = ['M 50 50']
-          const gap = (shape.minRays * (Math.PI / 180))
-          const rangeEnd = (shape.maxRays * Math.PI / 180)
-          const circle = (Math.PI * 2 - gap) - rangeEnd
-          const rangeBegin = circle + rangeEnd
-          for (
-            let i = rangeBegin; i > rangeBegin - circle; i -= (2 * Math.PI / 64)
-          ) {
-            if (i <= rangeBegin - circle * (normalValue)) {
+            if (fn(i, rangeBegin, circle)) {
               const x = Math.sin(i) * 38
               const y = Math.cos(i) * 38
               parts.push(`M ${50 + Math.sin(i) * 30} ${50 + Math.cos(i) * 30}`)
@@ -243,8 +225,40 @@ export default create({
             }
           }
           parts.push('z')
-          this.raylightpath.setAttribute('d', parts.join(' '))
+          return parts
         }
+
+        const { symmetric } = this
+
+        this.raypath.setAttribute(
+          'd',
+          draw(shape, (i, rangeBegin, circle) => {
+            const amount = rangeBegin - circle * normalValue
+            const half = rangeBegin - circle / 2
+            return symmetric
+              ? normalValue < 0.5
+                ? i < amount && i > half
+                : i > amount && i < half
+              : normalValue <= 0.01
+              ? false
+              : i > amount
+          }).join(' '),
+        )
+
+        this.raylightpath.setAttribute(
+          'd',
+          draw(shape, (i, rangeBegin, circle) => {
+            const amount = rangeBegin - circle * normalValue
+            const half = rangeBegin - circle / 2
+            return !(symmetric
+              ? normalValue <= 0.5
+                ? i < amount && i > half
+                : i > amount && i < half
+              : normalValue <= 0.01
+              ? false
+              : i > amount)
+          }).join(' '),
+        )
       },
       this.rays,
       this.raypath,
