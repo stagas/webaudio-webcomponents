@@ -73,7 +73,7 @@
       w-fader {
         width: 40px;
         height: 80px;
-        margin: 10px 0px 3px;
+        margin: 10px 0px 4px;
       }
       w-fader::part(fader-lines) {
         stroke: var(--grey);
@@ -85,6 +85,31 @@
       w-fader::part(fader-track-fill) {
         stroke: var(--white);
         stroke-width: 3px;
+      }
+      w-fader::part(fader-tip) {
+        padding: 10px;
+        margin-top: -5px;
+        transform: perspective(200px) rotateX(40deg);
+      }
+      w-fader::part(fader-tip):before {
+        content: '';
+        width: 80%;
+        height: 15%;
+        border-bottom: 4px solid var(--light);
+        position: absolute;
+        margin: 0 10%;
+        left: 0;
+        top: 0;
+      }
+      w-fader::part(fader-tip):after {
+        content: '';
+        width: 80%;
+        height: 45%;
+        border-top: 4px solid var(--dark);
+        position: absolute;
+        margin: 0 10%;
+        left: 0;
+        bottom: 5%;
       }
       w-audioplugin::part(param-group-legend) {
         font-family: sans-serif;

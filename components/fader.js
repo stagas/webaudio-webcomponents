@@ -28,6 +28,7 @@ export default create({
         this.html = `
         <style>
           [part=fader-outer] {
+            position: relative;
             width: 100%;
             height: 100%;
           }
@@ -55,6 +56,12 @@ export default create({
             stroke: #fff;
           }
           [part=fader-tip] {
+            box-sizing: border-box;
+            position: absolute;
+            width: 100%;
+            left: 0;
+            height: 10px;
+            background: #000;
             fill: #000;
             stroke: #000;
           }
@@ -66,8 +73,8 @@ export default create({
             <path part="fader-track-fill"></path>
             <path part="fader-lines"></path>
             <path part="fader-lines-fill"></path>
-            <path part="fader-tip"></path>
           </svg>
+          <div id="fadertip" part="fader-tip"></div>
         </div>
       `
       },
@@ -133,11 +140,12 @@ export default create({
         }
 
         {
-          const h = 5 + (1 - normal) * (this.size - 20)
-          this.faderTip.setAttribute(
-            'd',
-            `M 12 ${h} L 68 ${h} L 70 ${h + 10} L 10 ${h + 10} z`,
-          )
+          const h = 4 + (1 - normal) * (this.size - 20)
+          this.faderTip.style.top = (h * 0.8) + 'px'
+          // this.faderTip.setAttribute(
+          //   'd',
+          //   `M 12 ${h} L 68 ${h} L 70 ${h + 10} L 10 ${h + 10} z`,
+          // )
         }
       },
       this.faderTrack,
