@@ -66,6 +66,10 @@
         align-items: flex-end;
         justify-content: center;
       }
+      w-radio {
+        align-self: center;
+        margin: 10px;
+      }
       w-audioplugin::part(param-group-legend) {
         font-family: sans-serif;
         font-size: 8pt;
@@ -207,6 +211,7 @@
         ['param', './components/param.js'],
         ['knob', './components/knob.js'],
         ['fader', './components/fader.js'],
+        ['radio', './components/radio.js'],
         ['piano', './components/piano.js'],
         ['audioplugin', './components/audioplugin.js'],
       ])

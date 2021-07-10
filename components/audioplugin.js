@@ -57,22 +57,26 @@ export default create({
                 group === 'other'
                   ? ''
                   : `<legend part="param-group-legend">${group}</legend>`
-              }` + params.map(p => `
+              }` + params.map(p =>
+                p.select.length
+                  ? `<w-radio name="${p.name}" group="${group}"></w-radio>`
+                  : `
               <w-param ${
-                p.symmetric ? 'symmetric' : ''
-              }  name="${p.name}" group="${group}" slope="${p.slope}">
+                    p.symmetric ? 'symmetric' : ''
+                  }  name="${p.name}" group="${group}" slope="${p.slope}">
                 <w-knob ${p.symmetric ? 'symmetric' : ''} kind="${
-                ['soft', 'hard'][Math.random() * 2 | 0]
-              }" shape="${
-                [
-                  'hexagon',
-                  'octagon',
-                  'decagon',
-                  'dodecagon',
-                ][Math.random() * 4 | 0]
-              }" size="${65 + (Math.random() * 3 | 0) * 10}"></w-knob>
+                    ['soft', 'hard'][Math.random() * 2 | 0]
+                  }" shape="${
+                    [
+                      'hexagon',
+                      'octagon',
+                      'decagon',
+                      'dodecagon',
+                    ][Math.random() * 4 | 0]
+                  }" size="${65 + (Math.random() * 3 | 0) * 10}"></w-knob>
               </w-param>
-              `).join('') + '</fieldset>'
+              `
+              ).join('') + '</fieldset>'
           }).join('')
         }
           </div>
@@ -80,6 +84,11 @@ export default create({
           <w-destination></w-destination>
         </w-worklet>
         `
+        ;[...this.root.querySelectorAll('w-radio')].forEach(el => {
+          const param = plugin.parameters.find(p => p.name == el.name)
+          el.value = param.value
+          el.select = param.select
+        })
       }),
       this.src,
       this.audioContext,
