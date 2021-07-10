@@ -9,6 +9,7 @@ export default create({
     value: Number,
     min: Number,
     max: Number,
+    lines: 10,
     symmetric: false,
   },
   props: {},
@@ -25,11 +26,11 @@ export default create({
         this.html = `
         <style>
           [part=fader-outer] {
-            width: 80px;
-            height: 200px;
+            width: 100%;
+            height: 100%;
           }
           [part=fader-svg] {
-            width: 80px;
+            width: 100%;
             height: 100%;
           }
           #outer {
@@ -72,26 +73,27 @@ export default create({
 
         {
           const p = []
-          const n = 30
-          const one = (this.size - 30) / n
+          const n = this.lines
+          const one = (this.size - 34) / n
           for (let i = 0; i <= n; i++) {
-            const h = 10 + one / 2 + i * one
+            const h = 14 + one / 2 + i * one
             p.push(`M 30 ${h} L ${i % 5 ? 20 : 10} ${h}`)
           }
           this.faderLines.setAttribute('d', p.join(' ') + 'z')
         }
 
         {
-          const h = (1 - normalValue) * (this.size - 20)
+          const h = 5 + (1 - normalValue) * (this.size - 20)
           this.faderTip.setAttribute(
             'd',
-            `M 10 ${h} L 70 ${h} L 70 ${h + 20} L 10 ${h + 20} z`,
+            `M 12 ${h} L 68 ${h} L 70 ${h + 10} L 10 ${h + 10} z`,
           )
         }
       },
       this.faderTrack,
       this.faderTip,
       this.faderLines,
+      this.lines,
       this.value,
       this.min,
       this.max,

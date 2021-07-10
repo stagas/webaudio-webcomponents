@@ -22,7 +22,7 @@ export default create({
         groups.set('other', [])
 
         plugin.parameters.forEach(p => {
-          const [first, ...rest] = p.name.split(' ')
+          const [first, ..._rest] = p.name.split(' ')
 
           if (groups.has(first)) {
             groups.get(first).push(p)
@@ -32,7 +32,7 @@ export default create({
           }
         })
 
-        const groupItems = [...groups].filter(([g, params]) => {
+        const groupItems = [...groups].filter(([_g, params]) => {
           if (params.length === 1) {
             groups.get('other').push(params[0])
             return false
@@ -64,16 +64,24 @@ export default create({
               <w-param ${
                     p.symmetric ? 'symmetric' : ''
                   }  name="${p.name}" group="${group}" slope="${p.slope}">
-                <w-knob ${p.symmetric ? 'symmetric' : ''} kind="${
-                    ['soft', 'hard'][Math.random() * 2 | 0]
-                  }" shape="${
-                    [
-                      'hexagon',
-                      'octagon',
-                      'decagon',
-                      'dodecagon',
-                    ][Math.random() * 4 | 0]
-                  }" size="${65 + (Math.random() * 3 | 0) * 10}"></w-knob>
+                  ${
+                    (Math.random() * 3 | 0) === 0
+                      ? `<w-fader ${
+                        p.symmetric
+                          ? 'symmetric'
+                          : ''
+                      } size="100"></w-fader>`
+                      : `<w-knob ${p.symmetric ? 'symmetric' : ''} kind="${
+                        ['soft', 'hard'][Math.random() * 2 | 0]
+                      }" shape="${
+                        [
+                          'hexagon',
+                          'octagon',
+                          'decagon',
+                          'dodecagon',
+                        ][Math.random() * 4 | 0]
+                      }" size="${65 + (Math.random() * 3 | 0) * 10}"></w-knob>`
+                  }
               </w-param>
               `
               ).join('') + '</fieldset>'
