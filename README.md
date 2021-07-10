@@ -1,6 +1,6 @@
-# [wip] WebAudio WebComponents
+# WebAudio WebComponents
 
-![alt:components](./components.png)
+![alt:screenshot](./screenshot.png)
 
 ## Description
 
