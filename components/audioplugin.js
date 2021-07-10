@@ -61,7 +61,9 @@ export default create({
               <w-param ${
                 p.symmetric ? 'symmetric' : ''
               }  name="${p.name}" group="${group}" slope="${p.slope}">
-                <w-knob ${p.symmetric ? 'symmetric' : ''} shape="${
+                <w-knob ${p.symmetric ? 'symmetric' : ''} kind="${
+                ['soft', 'hard'][Math.random() * 2 | 0]
+              }" shape="${
                 [
                   'hexagon',
                   'octagon',

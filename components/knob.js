@@ -113,7 +113,7 @@ export default create({
     name: String,
     value: Number,
     symmetric: false,
-    type: 'soft',
+    kind: String,
   },
 
   props: { strokeDasharray: '', strokeDashoffset: '' },
@@ -141,8 +141,6 @@ export default create({
           }
           #rays {
             position: absolute;
-            width: ${this.size}px;
-            height: ${this.size}px;
           }
 
           #knobtrackcircle {
@@ -175,6 +173,7 @@ export default create({
           #raypath {
             fill: #fff;
             stroke: #fff;
+            stroke-width: 2px;
           }
           #raylightpath {
             fill: #666;
@@ -185,10 +184,13 @@ export default create({
             stroke: #fff;
           }
           #outer {
+            box-sizing: border-box;
             position: relative;
-            display: inline-flex;
+            display: flex;
             width: ${this.size}px;
-            height: 75px;
+            height: 120px;
+            margin-top: -20px;
+            margin-bottom: -25px;
             align-items: center;
             justify-content: center;
           }
@@ -203,7 +205,7 @@ export default create({
 
         <div id="outer">
           ${
-          this.type === 'soft'
+          this.kind === 'soft'
             ? `
           <svg id="knobtrack" viewBox="0 0 100 100">
             <circle id="knobtrackcircle" cx="50" cy="50" />
@@ -237,7 +239,7 @@ export default create({
       () => {
         const symmetricGap = 4
 
-        if (this.type === 'soft') {
+        if (this.kind === 'soft') {
           const r = 30
           const normal = this.value / 127
 
@@ -414,7 +416,7 @@ export default create({
           this.knob.style.transform = `rotate(${-shape.minRange
             + normalValue * (360 - shape.maxRange)}deg)`
 
-          const numOfRays = 64
+          const numOfRays = 52
 
           const draw = (shape, fn) => {
             const parts = ['M 50 50']
