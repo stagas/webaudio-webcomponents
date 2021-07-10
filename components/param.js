@@ -47,7 +47,7 @@ export default create({
           </style>
           <slot></slot>
           <input part="param-number" type="number" role="slider" style="width:${Math
-          .max(this.min.toFixed(1).length, this.max.toFixed(1).length) + 3}ch">
+          .max(this.min.toFixed(1).length, this.max.toFixed(1).length) + 4}ch">
           <input part="param-range" type="range" role="slider" min="0" max="127" step="1">
           <div part="param-name">${
           this.group ? this.name.replace(this.group + ' ', '') : this.name

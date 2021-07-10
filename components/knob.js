@@ -184,6 +184,7 @@ export default create({
             stroke: #fff;
           }
           #outer {
+            pointer-events: none;
             box-sizing: border-box;
             position: relative;
             display: flex;
