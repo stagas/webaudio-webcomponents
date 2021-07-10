@@ -1,5 +1,38 @@
 import { create, effect } from '../dist/index.js'
 
+const toRadians = angleInDegrees => (angleInDegrees - 90) * Math.PI / 180.0
+function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+  var angleInRadians = toRadians(angleInDegrees)
+
+  return {
+    x: centerX + (radius * Math.cos(angleInRadians)),
+    y: centerY + (radius * Math.sin(angleInRadians)),
+  }
+}
+
+function describeArc(x, y, radius, startAngle, endAngle) {
+  var start = polarToCartesian(x, y, radius, endAngle)
+  var end = polarToCartesian(x, y, radius, startAngle)
+
+  var largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1'
+
+  var d = [
+    'M',
+    start.x,
+    start.y,
+    'A',
+    radius,
+    radius,
+    0,
+    largeArcFlag,
+    0,
+    end.x,
+    end.y,
+  ].join(' ')
+
+  return d
+}
+
 function createBlob(options) {
   var points = []
   var path = options.element
@@ -80,10 +113,17 @@ export default create({
     name: String,
     value: Number,
     symmetric: false,
+    type: 'soft',
   },
-  props: {},
+
+  props: { strokeDasharray: '', strokeDashoffset: '' },
 
   pins: {
+    knobTrackCircle: '#knobtrackcircle',
+    knobTrackPath: '#knobtrackpath',
+    knobTrackFill: '#knobtrackfill',
+    knobIndicator: '#knobindicator',
+    knobRays: '#knobrays',
     rays: '#rays',
     raypath: '#raypath',
     raylightpath: '#raylightpath',
@@ -104,6 +144,34 @@ export default create({
             width: ${this.size}px;
             height: ${this.size}px;
           }
+
+          #knobtrackcircle {
+            fill: var(--black);
+          }
+
+          #knobindicator {
+            stroke: var(--white);
+            stroke-width: 3.5px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
+
+          #knobtrackpath {
+            fill: none;
+            stroke: var(--grey);
+            stroke-width: 3.5px;
+          }
+
+          #knobtrackfill {
+            fill: none;
+            stroke: var(--white);
+            stroke-width: 3px;
+          }
+
+          #knobrays {
+            stroke: var(--grey);
+          }
+
           #raypath {
             fill: #fff;
             stroke: #fff;
@@ -134,6 +202,19 @@ export default create({
         </style>
 
         <div id="outer">
+          ${
+          this.type === 'soft'
+            ? `
+          <svg id="knobtrack" viewBox="0 0 100 100">
+            <circle id="knobtrackcircle" cx="50" cy="50" />
+            <path id="knobtrackpath" />
+            <path id="knobtrackfill" />
+            <path id="knobrays" />
+            <path id="knobindicator" />
+          </svg>
+          <div id="circle" part="knob-circle"></div>
+          `
+            : `
           <svg id="rays" viewBox="0 0 100 100">
             <path id="raypath" part="knob-rays"></path>
             <path id="raylightpath" part="knob-rays-lights"></path>
@@ -143,6 +224,8 @@ export default create({
             <path id="indicator" part="knob-svg-indicator" d="M 21 50 L 19 50 z"></path>
           </svg>
           <div id="circle" part="knob-circle"></div>
+          `
+        }
         </div>
       `
       },
@@ -152,119 +235,185 @@ export default create({
 
     effect(
       () => {
-        const shapes = {
-          hexagon: {
-            numPoints: 6,
-            centerX: 50,
-            centerY: 50,
-            radius: 30,
-            minRange: 30,
-            maxRange: 120,
-            minRays: 62,
-            maxRays: 57,
-          },
-          octagon: {
-            numPoints: 8,
-            centerX: 50,
-            centerY: 50,
-            radius: 30,
-            minRange: 45,
-            maxRange: 90,
-            minRays: 42,
-            maxRays: 42,
-          },
-          decagon: {
-            numPoints: 10,
-            centerX: 50,
-            centerY: 50,
-            radius: 30,
-            minRange: 55,
-            maxRange: 70,
-            minRays: 34,
-            maxRays: 33,
-          },
-          dodecagon: {
-            numPoints: 12,
-            centerX: 50,
-            centerY: 50,
-            radius: 30,
-            minRange: 60,
-            maxRange: 60,
-            minRays: 30,
-            maxRays: 30,
-          },
-        }
+        if (this.type === 'soft') {
+          const r = 30
+          const normal = this.value / 127
+          const length = (normal * 2 * Math.PI) * r
+          const max = 7 * r
 
-        const shape = shapes[this.shape]
+          const start = 220
+          const end = 500
+          const circle = end - start
 
-        createBlob({ element: this.path, ...shapes[this.shape] })
-
-        const normalValue = this.value / 127
-
-        this.knob.style.transform = `rotate(${-shape.minRange
-          + normalValue * (360 - shape.maxRange)}deg)`
-
-        const numOfRays = 64
-
-        const draw = (shape, fn) => {
-          const parts = ['M 50 50']
-          const gap = (shape.minRays * (Math.PI / 180))
-          const rangeEnd = (shape.maxRays * Math.PI / 180)
-          const circle = (Math.PI * 2 - gap) - rangeEnd
-          const rangeBegin = circle + rangeEnd
-          for (
-            let i = rangeBegin;
-            i >= rangeBegin - circle;
-            i -= (2 * Math.PI / numOfRays)
-          ) {
-            if (fn(i, rangeBegin, circle)) {
-              const x = Math.sin(i) * 38
-              const y = Math.cos(i) * 38
-              parts.push(`M ${50 + Math.sin(i) * 30} ${50 + Math.cos(i) * 30}`)
-              parts.push('L ' + (50 + x) + ' ' + (50 + y))
-            }
+          this.knobTrackCircle.setAttribute('r', r)
+          this.knobTrackPath.setAttribute(
+            'd',
+            describeArc(50, 50, 30, start + circle * normal, end),
+          )
+          const rot = toRadians(normal * circle + start)
+          const indBegin = 17
+          const indSize = 5
+          const indStart = {
+            x: 50 + Math.cos(rot) * indBegin,
+            y: 50 + Math.sin(rot) * indBegin,
           }
-          parts.push('z')
-          return parts
+          if (indSize === 1) {
+            this.knobIndicator.setAttribute(
+              'd',
+              `M ${indStart.x} ${indStart.y} L ${indStart.x} ${indStart.y}`,
+            )
+          }
+          else {
+            this.knobIndicator.setAttribute(
+              'd',
+              `M ${indStart.x} ${indStart.y} L ${indStart.x
+                + Math.cos(rot) * indSize} ${indStart.y
+                + Math.sin(rot) * indSize}`,
+            )
+          }
+          if (normal > 0) {
+            this.knobTrackFill.setAttribute(
+              'd',
+              describeArc(50, 50, 30, start, start + circle * normal),
+            )
+          }
+          else {
+            this.knobTrackFill.setAttribute('d', '')
+          }
+
+          {
+            // TODO: only need to draw once then only rotate
+            const parts = ['M 50 50']
+            for (let i = 0; i < Math.PI * 2; i += Math.PI / 8) {
+              parts.push(
+                `M 50 50 L ${50 + Math.cos(i) * 24} ${50 + Math.sin(i) * 24}`,
+              )
+            }
+            this.knobRays.setAttribute('d', parts.join(' '))
+            this.knobRays.style.transformOrigin = '50% 50%'
+            this.knobRays.style.transform = `rotate(${normal * circle
+              + start}deg)`
+          }
+          // TODO: symmetric
         }
+        else {
+          const shapes = {
+            hexagon: {
+              numPoints: 6,
+              centerX: 50,
+              centerY: 50,
+              radius: 30,
+              minRange: 30,
+              maxRange: 120,
+              minRays: 62,
+              maxRays: 57,
+            },
+            octagon: {
+              numPoints: 8,
+              centerX: 50,
+              centerY: 50,
+              radius: 30,
+              minRange: 45,
+              maxRange: 90,
+              minRays: 42,
+              maxRays: 42,
+            },
+            decagon: {
+              numPoints: 10,
+              centerX: 50,
+              centerY: 50,
+              radius: 30,
+              minRange: 55,
+              maxRange: 70,
+              minRays: 34,
+              maxRays: 33,
+            },
+            dodecagon: {
+              numPoints: 12,
+              centerX: 50,
+              centerY: 50,
+              radius: 30,
+              minRange: 60,
+              maxRange: 60,
+              minRays: 30,
+              maxRays: 30,
+            },
+          }
 
-        const { symmetric } = this
+          const shape = shapes[this.shape]
 
-        this.raypath.setAttribute(
-          'd',
-          draw(shape, (i, rangeBegin, circle) => {
-            const amount = rangeBegin - circle * normalValue
-            const half = rangeBegin - circle / 2
-            return symmetric
-              ? normalValue < 0.5
-                ? i < amount && i > half
-                : i > amount && i < half
-              : normalValue <= 0.01
-              ? false
-              : i > amount
-          }).join(' '),
-        )
+          createBlob({ element: this.path, ...shapes[this.shape] })
 
-        this.raylightpath.setAttribute(
-          'd',
-          draw(shape, (i, rangeBegin, circle) => {
-            const amount = rangeBegin - circle * normalValue
-            const half = rangeBegin - circle / 2
-            return !(symmetric
-              ? normalValue <= 0.5
-                ? i < amount && i > half
-                : i > amount && i < half
-              : normalValue <= 0.01
-              ? false
-              : i > amount)
-          }).join(' '),
-        )
+          const normalValue = this.value / 127
+
+          this.knob.style.transform = `rotate(${-shape.minRange
+            + normalValue * (360 - shape.maxRange)}deg)`
+
+          const numOfRays = 64
+
+          const draw = (shape, fn) => {
+            const parts = ['M 50 50']
+            const gap = (shape.minRays * (Math.PI / 180))
+            const rangeEnd = (shape.maxRays * Math.PI / 180)
+            const circle = (Math.PI * 2 - gap) - rangeEnd
+            const rangeBegin = circle + rangeEnd
+            for (
+              let i = rangeBegin;
+              i >= rangeBegin - circle;
+              i -= (2 * Math.PI / numOfRays)
+            ) {
+              if (fn(i, rangeBegin, circle)) {
+                const x = Math.sin(i) * 38
+                const y = Math.cos(i) * 38
+                parts.push(
+                  `M ${50 + Math.sin(i) * 30} ${50 + Math.cos(i) * 30}`,
+                )
+                parts.push('L ' + (50 + x) + ' ' + (50 + y))
+              }
+            }
+            parts.push('z')
+            return parts
+          }
+
+          const { symmetric } = this
+
+          this.raypath.setAttribute(
+            'd',
+            draw(shape, (i, rangeBegin, circle) => {
+              const amount = rangeBegin - circle * normalValue
+              const half = rangeBegin - circle / 2
+              return symmetric
+                ? normalValue < 0.5
+                  ? i < amount && i > half
+                  : i > amount && i < half
+                : normalValue <= 0.01
+                ? false
+                : i > amount
+            }).join(' '),
+          )
+
+          this.raylightpath.setAttribute(
+            'd',
+            draw(shape, (i, rangeBegin, circle) => {
+              const amount = rangeBegin - circle * normalValue
+              const half = rangeBegin - circle / 2
+              return !(symmetric
+                ? normalValue <= 0.5
+                  ? i < amount && i > half
+                  : i > amount && i < half
+                : normalValue <= 0.01
+                ? false
+                : i > amount)
+            }).join(' '),
+          )
+        }
       },
       this.rays,
       this.raypath,
       this.raylightpath,
       this.knob,
       this.path,
+      this.type,
       this.shape,
       this.value,
     )

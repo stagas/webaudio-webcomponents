@@ -177,8 +177,8 @@ export default create({
           const value = this.value
           let index = this.getValueIndex(value) + dir
           while (
-            index >= 0
-            && index <= this.stepValues.length - 1
+            index > 0
+            && index < this.stepValues.length - 1
             && this.stepValues[index] === value
           ) {
             index += dir
@@ -378,7 +378,6 @@ export default create({
         this.slotted.forEach(el => {
           if (el) {
             if ('name' in el) {
-              // el.name = this.name
               el.min = 0
               el.max = 127
               el.value = this.rangeIndex
