@@ -235,21 +235,63 @@ export default create({
 
     effect(
       () => {
+        const symmetricGap = 4
+
         if (this.type === 'soft') {
           const r = 30
           const normal = this.value / 127
-          const length = (normal * 2 * Math.PI) * r
-          const max = 7 * r
 
-          const start = 220
+          const gap = 110
+          const start = gap * 2
           const end = 500
           const circle = end - start
 
           this.knobTrackCircle.setAttribute('r', r)
-          this.knobTrackPath.setAttribute(
-            'd',
-            describeArc(50, 50, 30, start + circle * normal, end),
-          )
+          if (this.symmetric) {
+            if (normal >= 0.5) {
+              const sc = Math.max(
+                start + circle / 2 + symmetricGap,
+                start + circle / 2 + ((circle / 2) - 10) * (normal - 0.5) * 2,
+              )
+              const ec = end
+
+              this.knobTrackPath.setAttribute(
+                'd',
+                describeArc(
+                  50,
+                  50,
+                  30,
+                  start,
+                  start + circle / 2 - symmetricGap,
+                ) + ' ' + describeArc(50, 50, 30, sc, ec),
+              )
+            }
+            else {
+              const sc = start
+              // Math.min(
+              //   start - 10,
+              //   start + circle / 2 + ((circle / 2) - 10) * (normal - 0.5) * 2,
+              // )
+              const ec = Math.min(
+                start + circle / 2 - symmetricGap,
+                start + circle / 2 - (circle / 2) * (0.5 - normal) * 2,
+              )
+
+              this.knobTrackPath.setAttribute(
+                'd',
+                describeArc(50, 50, 30, start + circle / 2 + symmetricGap, end)
+                  + ' '
+                  + describeArc(50, 50, 30, sc, ec),
+              )
+            }
+          }
+          else {
+            this.knobTrackPath.setAttribute(
+              'd',
+              describeArc(50, 50, 30, start + circle * normal, end),
+            )
+          }
+
           const rot = toRadians(normal * circle + start)
           const indBegin = 17
           const indSize = 5
@@ -271,11 +313,34 @@ export default create({
                 + Math.sin(rot) * indSize}`,
             )
           }
-          if (normal > 0) {
-            this.knobTrackFill.setAttribute(
-              'd',
-              describeArc(50, 50, 30, start, start + circle * normal),
-            )
+
+          if (normal >= 0) {
+            if (this.symmetric) {
+              if (normal >= 0.5) {
+                const sc = start + circle / 2 + symmetricGap
+                const ec = start + circle / 2
+                  + ((circle / 2)) * (normal - 0.5) * 2
+                this.knobTrackFill.setAttribute(
+                  'd',
+                  (ec - sc) > 0 ? describeArc(50, 50, 30, sc, ec) : '',
+                )
+              }
+              else {
+                const sc = start + circle / 2
+                  - ((circle - symmetricGap) / 2) * (0.5 - normal) * 2
+                const ec = start + circle / 2 - symmetricGap
+                this.knobTrackFill.setAttribute(
+                  'd',
+                  (ec - sc) > 0 ? describeArc(50, 50, 30, sc, ec) : '',
+                )
+              }
+            }
+            else {
+              this.knobTrackFill.setAttribute(
+                'd',
+                describeArc(50, 50, 30, start, start + circle * normal),
+              )
+            }
           }
           else {
             this.knobTrackFill.setAttribute('d', '')
