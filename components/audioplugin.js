@@ -65,7 +65,7 @@ export default create({
                     p.symmetric ? 'symmetric' : ''
                   }  name="${p.name}" group="${group}" slope="${p.slope}">
                   ${
-                    (Math.random() * 1 | 0) === 0
+                    (Math.random() * 3 | 0) === 0
                       ? `<w-fader ${
                         p.symmetric
                           ? 'symmetric'
