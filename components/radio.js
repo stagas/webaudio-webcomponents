@@ -46,6 +46,7 @@ export default create({
           align-items: center;
           padding: 0;
           margin: 0;
+          margin-top: -5px;
           border: none;
         }
 
@@ -56,7 +57,7 @@ export default create({
         #back {
           box-shadow: 2px 3.5px 0px 0 inset rgba(0, 0, 0, 0.3);
           background: var(--black);
-          height: 101%;
+          height: 93%;
           position: absolute;
           border: 2px inset var(--grey);
           top: 0.2em;
@@ -124,7 +125,7 @@ export default create({
 
           position: absolute;
           left: calc(0.31rem);
-          top: 0.26rem;
+          top: 0.16rem;
           height: 0.5rem;
           width: 1rem;
         }
