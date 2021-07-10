@@ -101,12 +101,14 @@ export default create({
           user-select: none;
           position: relative;
           box-sizing: border-box;
-          color: var(--light);
+          color: var(--grey);
           font-weight: bold;
           cursor: pointer;
           padding-left: calc(1.5rem + 1.3vw);
         }
-        .radio label:before,
+        .radio input:checked + label {
+          color: var(--white);
+        }
         .radio label:after {
           left: 0;
           top: 0.1em;
