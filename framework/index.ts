@@ -153,7 +153,8 @@ class Base extends HTMLElement {
       this.root.innerHTML = this.html
 
       for (const [key, selector] of Object.entries(params.pins ?? {})) {
-        self[key] = this.get(selector as string)
+        const el = this.get(selector as string)
+        if (el) self[key] = el
       }
 
       const slot = this.root.querySelector('slot')
@@ -172,7 +173,8 @@ class Base extends HTMLElement {
     dom(this.root, bind(this)(parts, ...values), this)
 
     for (const [key, selector] of Object.entries(this.params.pins ?? {})) {
-      ;(this as any)[key] = this.get(selector as string)
+      const el = this.get(selector as string)
+      if (el) (this as any)[key] = el
     }
 
     const slot = this.root.querySelector('slot')

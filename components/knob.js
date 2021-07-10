@@ -124,10 +124,10 @@ export default create({
     knobTrackFill: '#knobtrackfill',
     knobIndicator: '#knobindicator',
     knobRays: '#knobrays',
+    knob: '#knob',
     rays: '#rays',
     raypath: '#raypath',
     raylightpath: '#raylightpath',
-    knob: '#knob',
     path: '#path',
   },
 
@@ -154,7 +154,7 @@ export default create({
             stroke-linejoin: round;
           }
 
-          #knobtrackpath {
+          [part=trackpath] {
             fill: none;
             stroke: var(--grey);
             stroke-width: 3.5px;
@@ -179,7 +179,7 @@ export default create({
             fill: #666;
             stroke: #666;
           }
-          #path {
+          [part=knob-svg-path] {
             fill: #fff;
             stroke: #fff;
           }
@@ -208,9 +208,9 @@ export default create({
           ${
           this.kind === 'soft'
             ? `
-          <svg id="knobtrack" viewBox="0 0 100 100">
+          <svg id="knob" viewBox="0 0 100 100">
             <circle id="knobtrackcircle" cx="50" cy="50" />
-            <path id="knobtrackpath" />
+            <path id="path" part="trackpath" />
             <path id="knobtrackfill" />
             <path id="knobrays" />
             <path id="knobindicator" />
@@ -232,6 +232,7 @@ export default create({
         </div>
       `
       },
+      this.kind,
       this.size,
       this.value,
     )
@@ -258,7 +259,7 @@ export default create({
               )
               const ec = end
 
-              this.knobTrackPath.setAttribute(
+              this.path.setAttribute(
                 'd',
                 describeArc(
                   50,
@@ -280,7 +281,7 @@ export default create({
                 start + circle / 2 - (circle / 2) * (0.5 - normal) * 2,
               )
 
-              this.knobTrackPath.setAttribute(
+              this.path.setAttribute(
                 'd',
                 describeArc(50, 50, 30, start + circle / 2 + symmetricGap, end)
                   + ' '
@@ -289,7 +290,7 @@ export default create({
             }
           }
           else {
-            this.knobTrackPath.setAttribute(
+            this.path.setAttribute(
               'd',
               describeArc(50, 50, 30, start + circle * normal, end),
             )
@@ -476,12 +477,9 @@ export default create({
           )
         }
       },
-      this.rays,
-      this.raypath,
-      this.raylightpath,
+      this.kind,
       this.knob,
       this.path,
-      this.type,
       this.shape,
       this.value,
     )

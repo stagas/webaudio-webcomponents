@@ -435,7 +435,9 @@ var Base = class extends HTMLElement {
     effect(() => {
       this.root.innerHTML = this.html;
       for (const [key, selector] of Object.entries(params.pins ?? {})) {
-        self[key] = this.get(selector);
+        const el2 = this.get(selector);
+        if (el2)
+          self[key] = el2;
       }
       const slot = this.root.querySelector("slot");
       if (slot) {
@@ -451,8 +453,9 @@ var Base = class extends HTMLElement {
   render(parts, ...values) {
     dom(this.root, bind(this)(parts, ...values), this);
     for (const [key, selector] of Object.entries(this.params.pins ?? {})) {
-      ;
-      this[key] = this.get(selector);
+      const el2 = this.get(selector);
+      if (el2)
+        this[key] = el2;
     }
     const slot = this.root.querySelector("slot");
     if (slot) {

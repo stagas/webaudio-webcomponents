@@ -285,7 +285,7 @@ export default create({
       }, { capture: true })
       this.input.addEventListener('touchstart', (e) => {
         e.stopPropagation()
-      }, { capture: true })
+      }, { capture: true, passive: false })
     }, this.input)
 
     effect(

@@ -135,8 +135,14 @@ export default create({
               b.push(`M 30 ${h} L ${i % 5 ? 20 : 10} ${h}`)
             }
           }
-          this.faderLines.setAttribute('d', p.join(' ') + 'z')
-          this.faderLinesFill.setAttribute('d', b.join(' ') + 'z')
+          this.faderLines.setAttribute(
+            'd',
+            (p.length ? p.join(' ') + ' z' : ''),
+          )
+          this.faderLinesFill.setAttribute(
+            'd',
+            (b.length ? b.join(' ') + ' z' : ''),
+          )
         }
 
         {
@@ -152,6 +158,7 @@ export default create({
       this.faderTrackFill,
       this.faderTip,
       this.faderLines,
+      this.faderLinesFill,
       this.lines,
       this.value,
       this.min,

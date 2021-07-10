@@ -245,14 +245,20 @@ export default create({
 
           const ontouchend = callback(() => {
             this.turnOffKey(this.notePressed)
-            window.removeEventListener('touchmove', ontouchmove)
+            window.removeEventListener('touchmove', ontouchmove, {
+              passive: false,
+            })
           })
 
-          window.addEventListener('touchmove', ontouchmove)
-          window.addEventListener('touchend', ontouchend, { once: true })
+          window.addEventListener('touchmove', ontouchmove, { passive: false })
+          window.addEventListener('touchend', ontouchend, {
+            once: true,
+            passive: false,
+          })
 
           ontouchmove(e)
         }),
+        { passive: false },
       )
     }, this.keyboard)
 
