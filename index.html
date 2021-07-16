@@ -487,7 +487,6 @@ http://127.0.0.1:8080/#drummer=62~0~2~62~16~2~62~26~2!0~80.524~17.787~0.63~33~-1
         const paramValues = params.split('~').map(parseFloat)
         el.addEventListener('ready', () => {
           el.pianoroll.scrollTop = el.pianoroll.scrollHeight * scrollTop
-          el.style.opacity = 1
           let i = 0
           for (const [name, p] of el.worklet.audioNode.parameters) {
             p.value = paramValues[i]
@@ -496,6 +495,12 @@ http://127.0.0.1:8080/#drummer=62~0~2~62~16~2~62~26~2!0~80.524~17.787~0.63~33~-1
         }, { once: true })
       }
     }
+
+    document.querySelectorAll('w-audioplugin').forEach(el => {
+      el.addEventListener('ready', () => {
+        el.style.opacity = 1
+      }, { once: true })
+    })
 
     // save state in url bar on audioplugin change
     window.change = (e) => {
