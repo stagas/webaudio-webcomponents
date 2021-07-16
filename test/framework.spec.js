@@ -83,7 +83,13 @@ describe('create()', () => {
 
 describe('slot=true', () => {
   it('should create slot', () => {
-    const Foo = create({ class: 'foo', slot: true })
+    const Foo = create({
+      class: 'foo',
+      slot: true,
+      component() {
+        this.html = `<slot></slot>`
+      },
+    })
     const foo = defineAndCreateElement(Foo)
     expect(foo).to.be.instanceof(Foo)
     expect(foo.shadowRoot).to.be.instanceof(ShadowRoot)
@@ -93,10 +99,17 @@ describe('slot=true', () => {
   })
 
   it('should create slotted', (done) => {
-    const Foo = create({ class: 'foo', slot: true })
+    const Foo = create({
+      class: 'foo',
+      slot: true,
+      component() {
+        this.render `<slot></slot>`
+      },
+    })
     const foo = defineAndCreateElement(Foo, null, '<span>hello</span>')
     expect(foo).to.be.instanceof(Foo)
     expect(foo.shadowRoot).to.be.instanceof(ShadowRoot)
+    console.log(foo.shadowRoot)
     expect(foo.shadowRoot.querySelector('slot')).to.be.instanceof(
       HTMLSlotElement,
     )

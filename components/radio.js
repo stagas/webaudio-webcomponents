@@ -1,4 +1,4 @@
-import { bind, callback, create, effect } from '../dist/index.js'
+import { create, effect, slug } from '../dist/index.js'
 
 export default create({
   class: 'radio',
@@ -15,19 +15,17 @@ export default create({
 
   pins: { radios: '#radios' },
 
+  setRadio(n) {
+    const scale = (this.max - this.min)
+    this.value = Math.ceil((+n / this.select.length) * scale + this.min)
+  },
+
   component() {
     effect(
       () => {
         if (!this.select.length) return
 
-        const scale = (this.max - this.min)
-        const normal = (this.value - this.min) / scale / this.select.length
-
-        // TODO: framework: wrap methods in callback()
-        this.setRadio = callback((n) => {
-          const scale = (this.max - this.min)
-          this.value = Math.ceil((+n / this.select.length) * scale + this.min)
-        })
+        const activeIndex = this.value // (this.select.length / this.value) | 0
 
         this.render `
           <style>
@@ -46,7 +44,7 @@ export default create({
             align-items: center;
             padding: 0;
             margin: 0;
-            margin-top: -5px;
+            margin-top: 0px;
             border: none;
           }
 
@@ -56,10 +54,10 @@ export default create({
 
           #back {
             background: var(--black);
-            height: 93%;
+            height: 96%;
             position: absolute;
 
-            top: 0.2em;
+            top: 0em;
             margin-left: 0.25em;
             width: 1.5rem;
           }
@@ -68,7 +66,7 @@ export default create({
             display: inline-flex;
             font-size: 8pt;
             font-weight: bold;
-            margin: 0 0em 0 0;
+            margin: 0em 0em 0 0;
             writing-mode: vertical-rl;
             transform: scale(-1);
             text-align: center;
@@ -79,6 +77,7 @@ export default create({
 
           .radio {
             font-family: sans-serif;
+            display: flex;
           }
 
           .radio input {
@@ -99,11 +98,13 @@ export default create({
             font-family: sans-serif;
             font-size: 8pt;
             user-select: none;
+            top: 0.02rem;
             position: relative;
             box-sizing: border-box;
             color: var(--grey);
             font-weight: bold;
             cursor: pointer;
+            padding: 2px 0;
             padding-left: calc(1.5rem + 1.3vw);
           }
           .radio input:checked + label {
@@ -111,7 +112,7 @@ export default create({
           }
           .radio label:after {
             left: 0;
-            top: 0.1em;
+            top: 0;
           }
           .radio label:before {
             content: '';
@@ -124,9 +125,9 @@ export default create({
 
             position: absolute;
             left: calc(0.31rem);
-            top: 0.16rem;
+            top: 0.3rem;
             height: 0.5rem;
-            width: 1rem;
+            width: 1.5rem;
           }
 
           .radio-group:not(:hover)
@@ -138,9 +139,10 @@ export default create({
 
 
 
+
           </style>
 
-          <fieldset id="radios">
+          <fieldset id="radios" class="radio-group">
             <label for="${this.name}">${
           this.name.replace(this.group, '').trim()
         }</label>
@@ -150,13 +152,13 @@ export default create({
           this.select.map((radioName, index) => `
                 <div class="radio">
                   <input type="radio"
-                    name="${this.name}"
-                    id="${this.name + radioName}"
+                    name="${slug(this.name)}"
+                    id="${slug(this.name + radioName)}"
                     oninput="setRadio(${index})"
-                  ${
-            index === (this.value * this.select.length | 0) ? 'checked' : ''
-          } />
-                  <label for="${this.name + radioName}">${radioName}</label>
+                  ${index === activeIndex ? 'checked' : ''} />
+                  <label for="${
+            slug(this.name + radioName)
+          }">${radioName}</label>
                 </div>`).join('')
         }
               </div>

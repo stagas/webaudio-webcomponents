@@ -4,6 +4,7 @@ import { dom } from './dom.ts'
 import { effect, quiet, state, Types, unwrap, wrap } from './state.ts'
 import { bind, flatten, patchMethods, top } from './util.ts'
 
+export { dom }
 export * from './state.ts'
 export * from './util.ts'
 
@@ -22,8 +23,6 @@ const ComponentDescriptorProperties = [
   'pins',
   'component',
 ]
-
-const arrayEqual = (a: any[], b: any[]) => a.every((x, i) => x === b[i])
 
 const pascalCase = (s: string) =>
   s.split('-').map((p: string) => p[0].toLocaleUpperCase() + p.slice(1)).join(
@@ -103,13 +102,14 @@ const createAccessors = (
 }
 
 class Base extends HTMLElement {
-  static slot: boolean
+  static slot: boolean | 'shallow'
   static observedAttributes: string[]
 
   html!: string
   slotted!: Node[]
   params: ComponentParams
   state: ComponentParams
+  shallow!: boolean
 
   constructor({ attrs = {}, props = {}, pins = {} }: ComponentParams = {}) {
     super()
@@ -136,23 +136,41 @@ class Base extends HTMLElement {
     createAccessors(this, this.state.props)
     createAccessors(this, this.state.attrs, {
       set(key: string, value: any) {
-        if (this.getAttribute(key) != value) {
-          // this will trigger the observed attributes
-          // and this function will run again, so we
-          // return and let the observed fn to proceed
-          this.setAttribute(key, value)
-          return
-        }
+        wrap(() => {
+          const attr = this.getAttribute(key)
+          if (attr != value) {
+            // this will trigger the observed attributes
+            // and this function will run again, so we
+            // return and let the observed fn to proceed
+            const type = this.state.attrs[key].type
+            if (type === Boolean) {
+              if (attr == null) {
+                this.removeAttribute(key)
+                return
+              }
+            }
+            this.setAttribute(key, value)
+          }
+        })
       },
     })
     createAccessors(this, this.state.pins)
 
-    if (ctor.slot) this.createSlot()
+    if (ctor.slot) {
+      if (ctor.slot === 'shallow') {
+        this.shallow = true
+      }
+
+      this.render `<slot></slot>`
+    }
 
     effect(() => {
-      this.root.innerHTML = this.html
+      if (this.html.trim().length == 0) return
 
-      for (const [key, selector] of Object.entries(params.pins ?? {})) {
+      this.root.innerHTML = this.html
+      // render(html(this.html), this.root)
+
+      for (const [key, selector] of Object.entries(this.params.pins ?? {})) {
         const el = this.get(selector as string)
         if (el) self[key] = el
       }
@@ -160,6 +178,9 @@ class Base extends HTMLElement {
       const slot = this.root.querySelector('slot')
       if (slot) {
         this.useSlot(slot)
+      }
+      else {
+        this.createSlot()
       }
     }, this.html)
   }
@@ -169,8 +190,19 @@ class Base extends HTMLElement {
     return this.shadowRoot as ShadowRoot
   }
 
-  render(parts: string[], ...values: any[]) {
-    dom(this.root, bind(this)(parts, ...values), this)
+  getCommonStyleTag() {
+    return `<style>
+      ${(document.styleSheets?.[0]?.ownerNode as HTMLElement)?.innerHTML ?? ''}
+    </style>`
+  }
+
+  render(parts: TemplateStringsArray, ...values: any[]) {
+    dom(
+      this.root,
+      this.getCommonStyleTag()
+        + bind(this)(parts as unknown as string[], ...values),
+      this,
+    )
 
     for (const [key, selector] of Object.entries(this.params.pins ?? {})) {
       const el = this.get(selector as string)
@@ -181,24 +213,32 @@ class Base extends HTMLElement {
     if (slot) {
       this.useSlot(slot)
     }
+    else {
+      this.createSlot()
+    }
   }
 
   useSlot(slot: HTMLSlotElement) {
     const elements = () =>
-      slot.assignedElements({ flatten: true }).slice().map(el =>
-        [el, flatten(el)].flat()
-      ).flat()
+      this.shallow
+        ? slot.assignedElements({ flatten: true })
+        : slot.assignedElements({ flatten: true }).slice().map(el =>
+          [el, flatten(el)].flat()
+        ).flat()
 
-    if (slot.parentNode !== this.root) {
-      this.root.appendChild(slot)
-    }
+    // if (this.root.querySelector('slot') !== slot) {
+    //   this.root.appendChild(slot)
+    // }
+
     const get = () => {
       const newElements = elements()
       if (newElements.length) {
         this.slotted = newElements
       }
     }
+
     get()
+
     slot.addEventListener('slotchange', get)
   }
 
@@ -259,7 +299,7 @@ export const create = (d: ComponentDescriptor) => {
         top.__currentObject__ = this
         patchMethods(this, getPrototypeMethods(d))
         copy(this, getLocalProperties(d))
-        component?.call(this)
+        wrap(() => component?.call(this))
       }
     },
   }

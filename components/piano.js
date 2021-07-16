@@ -1,4 +1,4 @@
-import { callback, create, effect } from '../dist/index.js'
+import { callback, create, effect, wrap } from '../dist/index.js'
 
 const midiMessageEvent = new MIDIMessageEvent('midimessage', {
   data: new Uint8Array([0, 0, 0]),
@@ -7,11 +7,11 @@ const midiMessageEvent = new MIDIMessageEvent('midimessage', {
 export default create({
   class: 'piano',
 
-  attrs: { halfOctaves: 4, startOctave: 5 },
+  attrs: { halfoctaves: 4, startoctave: 5, vertical: false, auto: false },
 
   props: { notePressed: Number },
 
-  pins: { outer: '#outer', button: 'button', keyboard: '[part=keyboard]' },
+  pins: { outer: '#outer', button: 'button', keyboard: '#keyboard' },
 
   turnOnKey(note) {
     try {
@@ -19,7 +19,7 @@ export default create({
       if (el.classList.contains('pressed')) return
       el.classList.add('pressed')
       midiMessageEvent.data[0] = 0x90
-      midiMessageEvent.data[1] = (12 * this.startOctave) + Number(note)
+      midiMessageEvent.data[1] = (12 * this.startoctave) + Number(note)
       midiMessageEvent.data[2] = 127
       this.dispatch('midimessage', midiMessageEvent)
     }
@@ -34,7 +34,7 @@ export default create({
       if (!el.classList.contains('pressed')) return
       el.classList.remove('pressed')
       midiMessageEvent.data[0] = 0x89
-      midiMessageEvent.data[1] = (12 * this.startOctave) + Number(note)
+      midiMessageEvent.data[1] = (12 * this.startoctave) + Number(note)
       midiMessageEvent.data[2] = 0
       this.dispatch('midimessage', midiMessageEvent)
     }
@@ -55,10 +55,12 @@ export default create({
   },
 
   component() {
-    effect(() => {
-      this.render `
+    effect(
+      () => {
+        this.render `
         <style>
           :host {
+            display: flex;
             --pressed-white: #e44;
             --pressed-black: #e44;
           }
@@ -71,7 +73,6 @@ export default create({
             display: inline-flex;
             margin: auto;
             justify-content: center;
-            align-items: center;
           }
 
           .key {
@@ -87,26 +88,50 @@ export default create({
             text-transform: uppercase;
             font-family: sans-serif;
             font-size: 6pt;
-            padding: 3px;
+            /*padding: 3px;*/
           }
 
+          ${
+          this.vertical == true
+            ? `
+
           .white {
-            height: calc(8vh + 8vw);
-            flex: 10;
-            z-index: 1;
+            width: 100%;
+            height: 100%;
+            flex: 1;
             background-color: #CBCBCB;
           }
 
           .black {
-            z-index: 2;
-            flex: 5;
-            height: calc(6vw + 3.5vh);
+            flex: 1;
+            width: 100%;
+            height: 100%;
             background-color: #101010;
           }
 
-          .black {
-            margin: 0 -${[10, 4, 3, 2, 2][this.halfOctaves - 1] || 1.3}vw;
-          }
+          `
+            : `
+
+            .white {
+              height: calc(8vh + 8vw);
+              flex: 10;
+              z-index: 1;
+              background-color: #CBCBCB;
+            }
+
+            .black {
+              z-index: 2;
+              flex: 5;
+              height: calc(6vw + 3.5vh);
+              background-color: #101010;
+            }
+
+            .black {
+              margin: 0 -${[10, 4, 3, 2, 2][this.halfoctaves - 1] || 1.3}vw;
+            }
+
+            `
+        }
 
           .pressed.white {
             background: var(--pressed-white) !important;
@@ -127,7 +152,6 @@ export default create({
             top: 0;
             background: none;
             color: #fff;
-            z-index: 0;
             caret: none;
             resize: none;
           }
@@ -135,51 +159,60 @@ export default create({
           #keyboard {
             position: relative;
             display: flex;
-            flex-flow: row nowrap;
+            flex-flow: ${this.vertical ? 'column' : 'row'} nowrap;
             flex: 1;
-          }
-          #keyboard .key:last-child {
-            border-right: none !important;
           }
         </style>
 
-        <div id="outer">
+        <div id="outer" part="piano-outer">
           <button></button>
-          <div id="keyboard" part="keyboard">
+          <div id="keyboard" part="piano-keyboard">
             ${
-        Array(
-          6 * this.halfOctaves + (this.halfOctaves % 2 === 0
-            ? 1
-            : this.halfOctaves % 1 === 0
-            ? -1
-            : 1),
-        ).fill(0).map((_, i) => {
-          const ii = i % 12
-          const bw = 'wbwbwwbwbwbw'[ii] === 'b'
-          const nt = 'ccddeffggaab'[ii]
-          const sh = '-s-s--s-s-s-'[ii] === 's'
-          return `<div data-note="${i}" part="${
-            bw
-              ? 'piano-black'
-              : 'piano-white'
-          }" class="note key ${bw ? 'black' : 'white'} ${nt}">${nt}${
-            sh ? '#' : ''
-          }</div>`
-        }).join('')
-      }
+          (() => {
+            const a = Array(
+              6 * this.halfoctaves + (this.halfoctaves % 2 === 0
+                ? +!(this.vertical)
+                : this.halfoctaves % 1 === 0
+                ? -1
+                : 1),
+            ).fill(0).map((_, i) => {
+              const ii = i % 12
+              const bw = 'wbwbwwbwbwbw'[ii] === 'b'
+              const nt = 'ccddeffggaab'[ii]
+              const sh = '-s-s--s-s-s-'[ii] === 's'
+              return `<div data-note="${i}" part="${
+                bw ? 'piano-black' : 'piano-white'
+              }" class="note key ${bw ? 'black' : 'white'} ${nt}"></div>`
+            })
+
+            if (this.vertical) {
+              a.reverse()
+            }
+
+            return a.join('')
+          })()
+        }
           </div>
         </div>
       `
-    }, this.halfOctaves)
+      },
+      this.halfoctaves,
+      this.vertical,
+    )
 
-    effect(() => {
-      const resizeObserver = new ResizeObserver(callback(() => {
-        this.halfOctaves = Math.round(
-          (this.outer.getBoundingClientRect().width / 28) / 6,
-        )
-      }))
-      resizeObserver.observe(this.outer)
-    }, this.outer)
+    effect(
+      () => {
+        if (!this.auto) return
+        const resizeObserver = new ResizeObserver(callback(() => {
+          this.halfoctaves =
+            Math.round((this.outer.getBoundingClientRect().width / 28) / 6)
+            || this.halfoctaves
+        }))
+        resizeObserver.observe(this.outer)
+      },
+      this.outer,
+      this.auto,
+    )
 
     effect(() => {
       this.button.addEventListener('keydown', (e) => {

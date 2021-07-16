@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any no-extra-semi
 
-import { effect } from './state.ts'
+import { callback, effect } from './state.ts'
 
 export const top: any = window
 top.__methods__ ??= new Map()
@@ -12,7 +12,9 @@ export const UID = (key?: string) => {
 
 export const patchMethod = (obj: any, method: any, key?: string) => {
   const uid = UID(key)
-  top.__methods__.set(uid, method.bind(obj))
+  const fn = method.bind(obj)
+  if (key) obj[key] = callback(fn)
+  top.__methods__.set(uid, callback(fn))
   method.toString = () => `__methods__.get('${uid}')`
   return method
 }
@@ -74,4 +76,35 @@ export function* traverse(node: Node | null) {
 
 export const flatten = (node: Node | null) => {
   return [...traverse(node)]
+}
+
+export const arrayEqual = (a: any[], b: any[]) => a.every((x, i) => x === b[i])
+
+export const slug = (s: string) => {
+  return s.toLowerCase().replace(/[^a-z]/, '')
+}
+
+export function getOffset(el) {
+  let x = 0
+  let y = 0
+  do {
+    x += el.offsetLeft - el.scrollLeft
+    y += el.offsetTop - el.scrollTop
+  } while ((el = el.offsetParent))
+  return { x, y }
+}
+
+export function getRelativeMouseCoords(el, event) {
+  let x = 0
+  let y = 0
+  const { x: offsetX, y: offsetY } = getOffset(el)
+  // when moving cursor outside the window it very weirdly wraps
+  // its coordinates so this is correcting it (on Chrome/Linux)
+  let pageY = event.pageY
+  if (pageY > 16384) pageY -= 32768
+  x = event.pageX - offsetX
+  y = pageY - offsetY
+  x = Math.round(x)
+  y = Math.round(y)
+  return { x, y }
 }

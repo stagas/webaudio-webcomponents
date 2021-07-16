@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* tooltip */
+
+.tooltip {
+  background: rgba(0,0,0,.5);
+  padding: 20px;
+  font-family: sans-serif;
+  color: #fff;
+  position: absolute;
+  display: none;
+  z-index: 100000;
+}
+.tooltip.show {
+  display: block;
+}
+
+    </style>
+    <title>tooltip</title>
+  </head>
+  <body>
+    <w-tooltip content="hello" style="margin: 50px; display: block">
+      right click here
+    </w-tooltip>
+    <script type="module">
+      import Tooltip from './tooltip.js'
+      customElements.define('w-tooltip', Tooltip)
+    </script>
+  </body>
+</html>

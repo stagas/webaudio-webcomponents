@@ -134,7 +134,7 @@ export default create({
   component() {
     effect.once(
       () => {
-        this.html = `
+        this.render `
         <style>
           #knob {
             position: absolute;

@@ -10,6 +10,7 @@ export default create({
   component() {
     effect(
       atomic(async () => {
+        if (this.workletModuleReady) return
         await this.audioContext.audioWorklet.addModule(this.src)
         this.workletModuleReady = true
       }),
@@ -22,7 +23,9 @@ export default create({
       () => {
         if (!this.workletModuleReady) return
         if (this.audioNode) this.audioNode.disconnect()
-        this.audioNode = new AudioWorkletNode(this.audioContext, this.name)
+        this.audioNode = new AudioWorkletNode(this.audioContext, this.name, {
+          numberOfInputs: 2,
+        })
       },
       this.workletModuleReady,
       this.name,

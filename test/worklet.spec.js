@@ -11,7 +11,7 @@ describe('worklet', () => {
     let div
     const el =
       (((div = document.createElement('div')).innerHTML =
-        '<x-context><x-worklet src="./noise.js" name="noise"></x-worklet></x-context>'),
+        '<x-context latency="playback"><x-worklet src="./noise.js" name="noise"></x-worklet></x-context>'),
         div.firstChild.firstChild)
 
     effect(() => {
@@ -28,7 +28,7 @@ describe('worklet', () => {
     let div
     const el =
       (((div = document.createElement('div')).innerHTML =
-        '<x-context><x-worklet src="./noise.js" name="noise"><x-destination></x-destination></x-worklet></x-context>'),
+        '<x-context latency="playback"><x-worklet src="./noise.js" name="noise"><x-destination></x-destination></x-worklet></x-context>'),
         div.firstChild.firstChild)
 
     effect(() => {

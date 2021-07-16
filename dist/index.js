@@ -44,6 +44,9 @@ var update = (node, v, parent, updated = v.updated) => {
   if (!v.tag) {
     return node.data !== v && (parent.updated = true) && (node.data = v);
   }
+  if (v.attrs.key === node.getAttribute("key")) {
+    return false;
+  }
   for (const name in v.events) {
     node[name] = v.events[name], updated = true;
   }
@@ -59,7 +62,7 @@ var update = (node, v, parent, updated = v.updated) => {
   }
   return v.updated = updated;
 };
-var create = (v) => v.tag && (v.rendered = true) ? document.createElement(v.tag) : document.createTextNode(v);
+var create = (v) => v.tag && (v.rendered = true) ? ["svg", "path", "rect", "circle"].includes(v.tag) ? document.createElementNS("http://www.w3.org/2000/svg", v.tag) : document.createElement(v.tag) : document.createTextNode(v);
 function render(currentNode, v) {
   const prev = currentNode.childNodes;
   const next = v.children;
@@ -96,7 +99,10 @@ var UID = (key) => {
 };
 var patchMethod = (obj, method, key) => {
   const uid = UID(key);
-  top.__methods__.set(uid, method.bind(obj));
+  const fn = method.bind(obj);
+  if (key)
+    obj[key] = callback(fn);
+  top.__methods__.set(uid, callback(fn));
   method.toString = () => `__methods__.get('${uid}')`;
   return method;
 };
@@ -145,6 +151,32 @@ function* traverse(node) {
 var flatten = (node) => {
   return [...traverse(node)];
 };
+var arrayEqual = (a, b) => a.every((x, i) => x === b[i]);
+var slug = (s) => {
+  return s.toLowerCase().replace(/[^a-z]/, "");
+};
+function getOffset(el2) {
+  let x = 0;
+  let y = 0;
+  do {
+    x += el2.offsetLeft - el2.scrollLeft;
+    y += el2.offsetTop - el2.scrollTop;
+  } while (el2 = el2.offsetParent);
+  return { x, y };
+}
+function getRelativeMouseCoords(el2, event) {
+  let x = 0;
+  let y = 0;
+  const { x: offsetX, y: offsetY } = getOffset(el2);
+  let pageY = event.pageY;
+  if (pageY > 16384)
+    pageY -= 32768;
+  x = event.pageX - offsetX;
+  y = pageY - offsetY;
+  x = Math.round(x);
+  y = Math.round(y);
+  return { x, y };
+}
 
 // deno:file:///home/stagas/work/stagas/webaudio-webcomponents/framework/state.ts
 var Types = {
@@ -215,6 +247,9 @@ var state = (desc = {}) => {
           get value() {
             return this.valueOf();
           },
+          get type() {
+            return types.get(prop);
+          },
           [Symbol.toPrimitive]() {
             return this.valueOf();
           },
@@ -230,8 +265,14 @@ var state = (desc = {}) => {
         throw new ReferenceError("State has no property: " + prop.toString());
       }
       const valueToSet = castTo(type, value);
-      if (valueToSet === Reflect.get(target2, prop)) {
+      const existingValue = Reflect.get(target2, prop);
+      if (valueToSet === existingValue) {
         return true;
+      }
+      if (Array.isArray(existingValue) && Array.isArray(valueToSet)) {
+        if (arrayEqual(valueToSet, existingValue)) {
+          return true;
+        }
       }
       const result = Reflect.set(target2, prop, valueToSet);
       if (result) {
@@ -303,7 +344,7 @@ var callback = (fn, obj) => {
   const callbackFn = (...args) => {
     let result;
     unwrap(() => {
-      result = fn(...args);
+      result = fn.call(obj, ...args);
     });
     return result;
   };
@@ -323,7 +364,9 @@ var atomic = (fn) => {
     next = null;
     if (task) {
       try {
-        promise = task.fn(...task.args);
+        unwrap(() => {
+          promise = task.fn(...task.args);
+        });
         await promise;
       } catch (e) {
         console.error(e);
@@ -423,18 +466,33 @@ var Base = class extends HTMLElement {
     createAccessors(this, this.state.props);
     createAccessors(this, this.state.attrs, {
       set(key, value) {
-        if (this.getAttribute(key) != value) {
-          this.setAttribute(key, value);
-          return;
-        }
+        wrap(() => {
+          const attr = this.getAttribute(key);
+          if (attr != value) {
+            const type = this.state.attrs[key].type;
+            if (type === Boolean) {
+              if (attr == null) {
+                this.removeAttribute(key);
+                return;
+              }
+            }
+            this.setAttribute(key, value);
+          }
+        });
       }
     });
     createAccessors(this, this.state.pins);
-    if (ctor.slot)
-      this.createSlot();
+    if (ctor.slot) {
+      if (ctor.slot === "shallow") {
+        this.shallow = true;
+      }
+      this.render`<slot></slot>`;
+    }
     effect(() => {
+      if (this.html.trim().length == 0)
+        return;
       this.root.innerHTML = this.html;
-      for (const [key, selector] of Object.entries(params.pins ?? {})) {
+      for (const [key, selector] of Object.entries(this.params.pins ?? {})) {
         const el2 = this.get(selector);
         if (el2)
           self[key] = el2;
@@ -442,6 +500,8 @@ var Base = class extends HTMLElement {
       const slot = this.root.querySelector("slot");
       if (slot) {
         this.useSlot(slot);
+      } else {
+        this.createSlot();
       }
     }, this.html);
   }
@@ -450,8 +510,13 @@ var Base = class extends HTMLElement {
       this.attachShadow({ mode: "open" });
     return this.shadowRoot;
   }
+  getCommonStyleTag() {
+    return `<style>
+      ${document.styleSheets?.[0]?.ownerNode?.innerHTML ?? ""}
+    </style>`;
+  }
   render(parts, ...values) {
-    dom(this.root, bind(this)(parts, ...values), this);
+    dom(this.root, this.getCommonStyleTag() + bind(this)(parts, ...values), this);
     for (const [key, selector] of Object.entries(this.params.pins ?? {})) {
       const el2 = this.get(selector);
       if (el2)
@@ -460,13 +525,12 @@ var Base = class extends HTMLElement {
     const slot = this.root.querySelector("slot");
     if (slot) {
       this.useSlot(slot);
+    } else {
+      this.createSlot();
     }
   }
   useSlot(slot) {
-    const elements = () => slot.assignedElements({ flatten: true }).slice().map((el2) => [el2, flatten(el2)].flat()).flat();
-    if (slot.parentNode !== this.root) {
-      this.root.appendChild(slot);
-    }
+    const elements = () => this.shallow ? slot.assignedElements({ flatten: true }) : slot.assignedElements({ flatten: true }).slice().map((el2) => [el2, flatten(el2)].flat()).flat();
     const get = () => {
       const newElements = elements();
       if (newElements.length) {
@@ -513,7 +577,7 @@ var create2 = (d) => {
         top.__currentObject__ = this;
         patchMethods(this, getPrototypeMethods(d));
         copy(this, getLocalProperties(d));
-        component?.call(this);
+        wrap(() => component?.call(this));
       }
     }
   };
@@ -529,17 +593,22 @@ var create2 = (d) => {
 export {
   Types,
   UID,
+  arrayEqual,
   atomic,
   bind,
   callback,
   create2 as create,
+  dom,
   effect,
   el,
   flatten,
+  getOffset,
+  getRelativeMouseCoords,
   mergeParams,
   patchMethod,
   patchMethods,
   quiet,
+  slug,
   state,
   top,
   traverse,

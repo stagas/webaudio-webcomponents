@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any no-extra-semi
 
-import { patchMethod, top } from './util.ts'
+import { arrayEqual, patchMethod, top } from './util.ts'
 
 export type Constructor =
   | ArrayConstructor
@@ -99,6 +99,9 @@ export const state = (desc: StateDescription = {}) => {
           get value() {
             return this.valueOf()
           },
+          get type() {
+            return types.get(prop)
+          },
           [Symbol.toPrimitive]() {
             return this.valueOf()
           },
@@ -121,9 +124,17 @@ export const state = (desc: StateDescription = {}) => {
 
       const valueToSet = castTo(type, value)
 
+      const existingValue = Reflect.get(target, prop)
       // if value is the same as before, don't trigger
-      if (valueToSet === Reflect.get(target, prop)) {
+      if (valueToSet === existingValue) {
+        // console.log('value to set', valueToSet, Reflect.get(target, prop))
         return true
+      }
+
+      if (Array.isArray(existingValue) && Array.isArray(valueToSet)) {
+        if (arrayEqual(valueToSet, existingValue)) {
+          return true
+        }
       }
 
       const result = Reflect.set(target, prop, valueToSet)
@@ -213,11 +224,11 @@ effect.wrap = (fn: () => void, ...deps: any[]) => {
   return effect(wrap(fn) as any, ...deps)
 }
 
-export const callback = (fn: (...args: any[]) => void, obj: any) => {
+export const callback = (fn: (...args: any[]) => void, obj?: any) => {
   const callbackFn = (...args: any[]) => {
     let result
     unwrap(() => {
-      result = fn(...args)
+      result = fn.call(obj, ...args)
     })
     return result
   }
@@ -242,7 +253,9 @@ export const atomic = (fn: (...args: any[]) => Promise<void>) => {
 
     if (task) {
       try {
-        promise = task.fn(...task.args)
+        unwrap(() => {
+          promise = (task as Task).fn(...(task as Task).args)
+        })
         await promise
       }
       catch (e) {

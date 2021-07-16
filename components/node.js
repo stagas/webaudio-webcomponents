@@ -1,4 +1,11 @@
-import { atomic, create, effect, flatten, wrap } from '../dist/index.js'
+import {
+  atomic,
+  callback,
+  create,
+  effect,
+  flatten,
+  wrap,
+} from '../dist/index.js'
 export * from '../dist/index.js'
 
 export const WebAudioNode = create({
@@ -6,11 +13,18 @@ export const WebAudioNode = create({
 
   slot: true,
 
-  props: { audioNode: Object, audioContext: Object },
+  props: { audioNode: Object, audioContext: Object, isReady: false },
 
   connectedInputs: [],
 
   component() {
+    effect(() => {
+      if (this.audioNode && this.isReady == false) {
+        this.isReady = true
+        this.dispatch('ready', this.audioNode)
+      }
+    }, this.audioNode)
+
     effect(
       atomic(async () => {
         this.connectInputs()
@@ -68,6 +82,7 @@ export const WebAudioNode = create({
           value: p.value,
         })
 
+        // let changeTimeout
         const handler = () => {
           const value = +target.value
           p.setValueAtTime(value, context.currentTime + 0.05)
@@ -80,6 +95,16 @@ export const WebAudioNode = create({
               input.value = value
             }
           }
+          setTimeout(
+            callback(() => {
+              this.dispatch('change')
+            }),
+            100,
+          )
+          // clearTimeout(changeTimeout)
+          // changeTimeout = setTimeout(() => {
+          //   this.dispatch('input')
+          // }, 500)
         }
 
         target.addEventListener('input', handler)

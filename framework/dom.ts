@@ -85,6 +85,11 @@ const update = (node: any, v: any, parent: any, updated = v.updated) => {
     return node.data !== v && (parent.updated = true) && (node.data = v)
   }
 
+  if (v.attrs.key === node.getAttribute('key')) {
+    // console.log('match', v.attrs.key)
+    return false
+  }
+
   for (const name in v.events) {
     node[name] = v.events[name], updated = true
   }
@@ -106,7 +111,9 @@ const update = (node: any, v: any, parent: any, updated = v.updated) => {
 
 const create = (v: any) =>
   v.tag && (v.rendered = true)
-    ? document.createElement(v.tag)
+    ? ['svg', 'path', 'rect', 'circle'].includes(v.tag)
+      ? document.createElementNS('http://www.w3.org/2000/svg', v.tag)
+      : document.createElement(v.tag)
     : document.createTextNode(v)
 
 export function render(currentNode: any, v: any) {

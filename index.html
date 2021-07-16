@@ -1,283 +1,546 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=0.8, user-scalable=no"
-    />
-    <title>WebAudio WebComponents</title>
-  </head>
-  <body style="background: #333">
-    <style id="globstyle">
-      :root {
-        --white: #fff;
-        --grey: #888;
-        --dark: #666;
-        --light: #aaa;
-        --black: #151515;
-        --blackest: #111;
-        --black-opacity: rgba(0,0,0,0.15);
-      }
 
-      html {
-        scrollbar-color: var(--white);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no" />
+  <script async defer type="module" src="vendor/element.js"></script>
+  <title>WebAudio WebComponents</title>
+</head>
 
-      ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-      }
+<body style="background: #333">
+  <style id="globstyle">
+    :root {
+      --white: #fff;
+      --grey: #888;
+      --dark: #666;
+      --light: #aaa;
+      --black: #151515;
+      --blackest: #111;
+      --black-opacity: rgba(0, 0, 0, 0.15);
+      --blacker-opacity: rgba(0, 0, 0, 0.05);
+      --blackest-opacity: rgba(0, 0, 0, 0.75);
+    }
 
-      ::-webkit-scrollbar-corner {
-        background-color: var(--grey);
-      }
+    html {
+      scrollbar-color: var(--white);
+    }
 
-      ::-webkit-scrollbar-thumb {
-        background-color: var(--grey);
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background-color: var(--grey);
-      }
-      ::-webkit-scrollbar-thumb:active {
-        background-color: var(--grey);
-      }
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
 
-      html,
-      body {
-        height: 100%;
-        padding: 0;
-        margin: 0;
-      }
+    ::-webkit-scrollbar-corner {
+      background-color: var(--dark);
+    }
 
-      w-audioplugin {
-        gap: 10px;
-      }
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--dark);
+    }
 
-      w-audioplugin::part(param-group) {
-        position: relative;
-        flex: 0;
-        color: var(--black);
-        background: var(--black-opacity);
-        border: none;
-        padding: 0;
-        min-width: 280px;
-        gap: 10px;
-        text-align: left;
-        display: flex;
-        flex-flow: row wrap;
-        align-items: flex-end;
-        justify-content: center;
-      }
-      w-radio {
-        align-self: center;
-        margin: 10px;
-      }
-      w-radio::part(radio-back) {
-        border-top: 2px inset var(--black);
-        border-left: 2px inset var(--black);
-        border-right: 2px inset var(--dark);
-        border-bottom: 2px inset var(--dark);
-      }
-      w-fader {
-        width: 40px;
-        height: 80px;
-        margin: 10px 0px 4px;
-      }
-      w-fader::part(fader-lines) {
-        stroke: var(--grey);
-      }
-      w-fader::part(fader-track) {
-        stroke: var(--grey);
-        stroke-width: 3px;
-      }
-      w-fader::part(fader-track-fill) {
-        stroke: var(--white);
-        stroke-width: 3px;
-      }
-      w-fader::part(fader-tip) {
-        padding: 10px;
-        margin-top: -5px;
-        transform: perspective(200px) rotateX(40deg);
-        background: var(--black);
-      }
-      w-fader::part(fader-tip):before {
-        content: '';
-        width: 80%;
-        height: 15%;
-        border-bottom: 4px solid var(--light);
-        position: absolute;
-        margin: 0 10%;
-        left: 0;
-        top: 0;
-      }
-      w-fader::part(fader-tip):after {
-        content: '';
-        width: 80%;
-        height: 45%;
-        border-top: 4px solid var(--dark);
-        position: absolute;
-        margin: 0 10%;
-        left: 0;
-        bottom: 5%;
-      }
-      w-audioplugin::part(param-group-legend) {
-        font-family: sans-serif;
-        font-size: 8pt;
-        position: absolute;
-        padding: 0 5px;
-        left: 0;
-        top: 0;
-        color: var(--white);
-        background: var(--black);
-      }
-      w-worklet {
-        display: flex;
-        flex-flow: column nowrap;
-        height: 100%;
-        align-items: center;
-        justify-content: center;
-      }
-      .worklet-inner {
-        display: flex;
-        width: 100%;
-        height: 100%;
-        flex-flow: row wrap;
-        align-items: center;
-        justify-content: space-around;
-        overflow-y: auto;
-        overflow-x: hidden;
-      }
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--dark);
+    }
 
-      /* knob */
+    ::-webkit-scrollbar-thumb:active {
+      background-color: var(--dark);
+    }
 
-      w-knob::part(knob-svg-path) {
-        fill: var(--black);
-        stroke: var(--grey);
-        stroke-width: 2px;
+    html,
+    body {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* spacer */
+
+    w-spacer>* {
+      width: 100%;
+      height: 100%;
+    }
+
+    w-spacer::part(spacer-handle) {
+      z-index: 10000;
+      background: transparent;
+      cursor: ew-resize;
+    }
+
+    w-spacer[vertical]::part(spacer-handle) {
+      cursor: ns-resize;
+    }
+
+    /* audioplugin */
+
+    w-audioplugin {
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    w-audioplugin::part(audioplugin-outer) {
+      box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* param-group fieldset */
+
+    fieldset[part=param-group] {
+      position: relative;
+      color: var(--black);
+      background: var(--black-opacity);
+      border: none;
+      padding: 0;
+      margin: 0;
+      display: inline-flex;
+      align-self: stretch;
+    }
+
+    fieldset[part=param-group]:nth-child(2n) {
+      background: var(--blacker-opacity);
+    }
+
+    fieldset[part=param-group] legend {
+      font-family: sans-serif;
+      font-size: 8pt;
+      position: absolute;
+      padding: 0 5px;
+      left: 0;
+      top: 0;
+      color: var(--white);
+      background: var(--black);
+    }
+
+
+    /* tooltip */
+
+    .tooltip {
+      background: var(--blackest-opacity);
+      padding: 20px;
+      font-family: sans-serif;
+      color: var(--white);
+      position: absolute;
+      display: none;
+      z-index: 100000;
+    }
+
+    .tooltip.show {
+      display: block;
+    }
+
+    /* radio */
+
+    w-radio {
+      align-self: center;
+      margin: 10px;
+    }
+
+    w-radio::part(radio-back) {
+      border-top: 2px inset var(--black);
+      border-left: 2px inset var(--black);
+      border-right: 2px inset var(--dark);
+      border-bottom: 2px inset var(--dark);
+    }
+
+    /* pianoroll */
+
+    w-pianoroll {
+      flex: 1;
+      overflow: auto;
+    }
+
+    w-pianoroll::part(pianoroll-outer) {}
+
+    w-pianoroll::part(grid-note) {
+      background: var(--grey);
+      border: 1.15px solid var(--white);
+      border-right-color: var(--black);
+      border-bottom-color: var(--black);
+    }
+
+    w-pianoroll::part(timeline-indicator) {
+      background: var(--light);
+    }
+
+    /* fader */
+
+    w-fader {
+      width: 40px;
+      height: 80px;
+      margin: 0px 0px 3px;
+    }
+
+    w-fader::part(fader-lines) {
+      stroke: var(--grey);
+    }
+
+    w-fader::part(fader-track) {
+      stroke: var(--grey);
+      stroke-width: 3px;
+    }
+
+    w-fader::part(fader-track-fill) {
+      stroke: var(--white);
+      stroke-width: 3px;
+    }
+
+    w-fader::part(fader-tip) {
+      padding: 10px;
+      margin-top: -5px;
+      transform: perspective(200px) rotateX(40deg);
+      background: var(--black);
+    }
+
+    w-fader::part(fader-tip):before {
+      content: '';
+      width: 80%;
+      height: 15%;
+      border-bottom: 4px solid var(--light);
+      position: absolute;
+      margin: 0 10%;
+      left: 0;
+      top: 0;
+    }
+
+    w-fader::part(fader-tip):after {
+      content: '';
+      width: 80%;
+      height: 45%;
+      border-top: 4px solid var(--dark);
+      position: absolute;
+      margin: 0 10%;
+      left: 0;
+      bottom: 5%;
+    }
+
+    /* worklet */
+
+    w-worklet {
+      display: flex;
+      height: 100%;
+      /* this makes worklet inner scrollable */
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .worklet-inner {
+      box-sizing: border-box;
+      display: block;
+      width: 49vw;
+      padding-right: 10px;
+      text-align: center;
+      overflow: auto;
+    }
+
+    /* knob */
+
+    w-knob::part(knob-svg-path) {
+      fill: var(--black);
+      stroke: var(--grey);
+      stroke-width: 2px;
+    }
+
+    w-knob::part(knob-circle) {
+      position: absolute;
+      background: var(--grey);
+      border-top: 1.5px solid var(--white);
+      border-left: 1.5px solid var(--white);
+      box-shadow: inset -1px -1px 3px -1px var(--dark);
+      width: 20px;
+      height: 20px;
+      border-radius: 100%;
+      z-index: 1;
+    }
+
+    /* param */
+
+    w-param {
+      position: relative;
+      display: inline-flex;
+      flex-flow: column wrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    w-param::part(param-name) {
+      font-size: 8pt;
+      font-family: sans-serif;
+      font-weight: bold;
+      color: var(--light);
+      margin: 0.7em;
+    }
+
+    w-param::part(param-number) {
+      background: var(--black);
+      border: 2px inset var(--black);
+      border-right: 2px inset var(--dark);
+      border-bottom: 2px inset var(--dark);
+      color: var(--white);
+      font-family: monospace;
+      font-size: 8pt;
+      text-align: center;
+    }
+
+    w-param::part(param-range) {
+      display: none;
+    }
+
+    /* piano */
+
+    w-piano {
+      width: 100%;
+    }
+
+    w-piano::part(piano-white) {
+      background: var(--black);
+      border-right: 4px solid var(--black);
+    }
+
+    w-piano::part(piano-black) {
+      background: var(--grey);
+      border-top: 1.5px solid var(--white);
+      border-left: 1.5px solid var(--white);
+    }
+
+    w-piano {
+      --pressed-white: var(--grey);
+      --pressed-black: var(--black);
+    }
+
+    w-floating {
+      z-index: 100000;
+    }
+
+    w-floating.dragging {
+      cursor: grabbing;
+    }
+
+    #transport {
+      background: var(--blackest-opacity);
+      padding: 18px 24px;
+      right: 3%;
+      gap: 15px;
+      display: flex;
+    }
+
+    #transport svg-icon::part(svg-icon-path) {
+      fill: var(--dark);
+    }
+
+    #transport button {
+      border: 2px solid var(--dark);
+      color: var(--white);
+      background: transparent;
+      width: 30px;
+      padding: 0;
+    }
+
+    #transport button:hover {
+      border-color: var(--grey);
+    }
+
+    #transport button:hover svg-icon::part(svg-icon-path) {
+      fill: var(--grey);
+    }
+
+    #transport button:focus,
+    #transport button:active {
+      border-color: var(--white);
+    }
+
+    #transport button:focus svg-icon::part(svg-icon-path),
+    #transport button:active svg-icon::part(svg-icon-path) {
+      fill: var(--white);
+    }
+
+    .no-border {
+      border: none !important;
+      margin: -7px;
+    }
+
+    svg-icon[is="drag"] {
+      cursor: grab;
+    }
+
+    button:active svg-icon[is="drag"] {
+      cursor: grabbing;
+    }
+
+    /* responsive */
+
+    @media screen and (max-width: 600px) {
+      fieldset[part=param-group] {
+        min-width: 48%;
+        border-bottom: 1px solid var(--dark);
       }
+    }
+  </style>
 
-      w-knob::part(knob-circle) {
-        position: absolute;
-        background: var(--grey);
-        border-top: 1.5px solid var(--white);
-        border-left: 1.5px solid var(--white);
-        box-shadow: inset -1px -1px 3px -1px var(--dark);
-        width: 27px;
-        height: 27px;
-        border-radius: 100%;
-        z-index: 1;
+  <!--
+
+interesting tracks:
+
+http://127.0.0.1:8080/#drummera=83~0~2~83~8~2~83~16~2~83~24~2!0~86.313~15.345~1.575~56.485~-11.024~1~43.179~2.52~0.5~0~100~100~444.733~0&drummerb=88~8~2~87~24~2!0~-42.196~30~0.315~1.955~-14.173~4~2373.7129~0.63~1.56~0~100~100~2763.1101~0&tb303a=79~18~1~79~22~1~79~26~1~79~30~1!52.39~23.622~24~2.953~7.53~85~4.66~0.76~22~0.7&tb303b=60~2~2~60~2~2!28.346~692.913~24~0.236~0.787~228.346~4.66~0.913~9.685~0.693
+http://127.0.0.1:8080/#drummera=52~0~2~52~16~2~52~32~2~52~48~2!0~-31.877~13.124~1.5~100~0~1~44~4.409~0.5~0~100~100~1000~0&drummerb=60~8~2~60~4~2~60~0~2~60~12~2~60~16~2~60~20~2~60~24~2~60~28~2~60~32~2~60~36~2~60~40~2~60~44~2~60~48~2~60~52~2~60~56~2~60~60~2!0~-170.891~12.5~0.315~0.011~-36.22~4~44~0.315~0.19~0~100~100~603.569~0&tb303a=67~0~2~74~43~2~74~8~2!52.39~100~24~4.23~7.53~85~4.66~0.76~22~0.7&tb303b=65~4~2~65~28~2!257.48~196.85~24~4.724~9.291~81.732~8.661~0.76~13.465~0.772
+http://127.0.0.1:8080/#drummera=72~8~2~72~24~2!0~1000~27.335~26.772~80.503~-15.433~4~115.694~3.465~2.457~0~59.055~21.26~11305.7129~0&drummerb=62~0~2~62~16~2~62~24~2~62~8~2!0~175~12.5~1.5~33~0~0~44~1.5~0.5~0~100~100~1000~0&tb303a=71~2~2~71~6~2~83~18~2~71~22~2!52.39~100~24~4.23~7.53~85~4.66~0.76~22~0.7&tb303b=71~2~2~71~10~2~71~28~2~71~16~2!125.197~362.205~24~4.016~3.701~43.15~4.66~0.488~14.173~0.63
+http://127.0.0.1:8080/#drummera=72~8~2~72~24~2!0~1000~1.8~0.315~0.388~-15.433~4~15216.3555~3.465~2.457~0~100~7.874~2054.7749~0&drummerb=62~0~2~62~16~2~62~24~2~62~8~2!0~122.993~9.794~1.5~33~0~0~44~24.882~0.5~0~5.512~49.606~3321.3291~0&tb303a=71~2~2~71~6~2~71~22~2~83~18~2~71~11~2!127.559~133.858~24~7.677~7.53~85~4.882~0.425~22~1.26&tb303b=71~2~2~71~10~2~71~28~2~71~16~2!125.197~464.567~24~9.685~5.748~43.15~10.866~0~14.173~0.63
+
+http://127.0.0.1:8080/#drummera=72~8~2~72~24~2~78~20~2!0~136.053~24.005~0.315~0.082~-15.433~4~4845.5811~14.173~2.457~1~100~7.874~1403.033~0&tb303b=66~0~2~66~4~2~66~8~2~74~6~2~73~10~2~66~14~2~67~20~2~72~26~2!52.39~763.78~24~2.244~2.283~43.15~3.937~0.457~22~0.787
+
+http://127.0.0.1:8080/#drummer=62~0~2~62~16~2~62~32~2~62~48~2!0~175~8.906~1.5~33~0~0~44~1.5~0.5~0~100~100~1000~0&tb303=63~4~2~67~28~2~72~56~2~63~12~2~74~20~2!52.39~78.74~24~6.378~3.543~74.016~4.66~0.76~11.339~0.7
+http://127.0.0.1:8080/#drummer=49~0~2~49~16~2!0~175~12.5~1.5~33~0~0~44~1.5~0.5~0~100~100~1000~0&tb303=54~26~2~54~6~2!120.472~283.465~24~2.835~10~43.15~2.992~0.299~6.614~0.661
+http://127.0.0.1:8080/#drummer=57~0~2~57~16~2!0~175~12.5~1.5~33~-12.913~1~44~2.52~0.5~0~100~100~696.772~0&tb303=59~4~2~62~8~2~61~24~2~69~28~2!11.811~118.11~24~3.071~7.795~20~3.78~0.315~21.496~0.362
+http://127.0.0.1:8080/#drummer=49~16~2~49~0~2!0~-42.196~17.787~2.205~100~-11.654~1~68.208~4.409~0.5~0~100~100~560.519~0&tb303=69~8~2~81~24~2!9.449~133.858~24~1.89~0.945~58.583~5.197~0.236~6.378~0.551
+http://127.0.0.1:8080/#drummer=49~0~2~49~16~2!0~98.156~13.569~1.5~17.28~-19.843~1~30.687~1.5~0.5~0~100~100~444.733~0&tb303=57~12~2~57~4~2~64~0~2~74~16~2~68~5~2~72~27~2~63~20~2~83~10~2~81~0~2~81~21~2!188.976~1000~24~6.614~1.575~236.063~0.945~0.315~22.677~0.283
+http://127.0.0.1:8080/#drummer=43~0~2~43~16~2!0~253.154~12.5~2.205~33~0~1~44~1.5~0.5~0~100~100~2895.925~0&tb303=59~0~2~59~9~2~55~15~2~62~20~2~64~24~2!56.693~100~24~8.268~6.535~85~4.66~0.76~22~0.7
+http://127.0.0.1:8080/#drummer=43~0~2~43~22~2~43~12~2!0~-80.524~6.685~5.669~22.333~-17.953~1~102.136~6.299~0.379~0~41.732~100~560.519~0&tb303=59~0~2~55~15~2~64~24~2~67~12~2~65~20~2!40.157~440.945~23.816~7.677~1.575~421.26~4.66~0.866~17.244~0.425
+http://127.0.0.1:8080/#drummer=62~0~2~62~16~2~62~26~2!0~80.524~17.787~0.63~33~-19.843~0~203.067~3.465~1.371~0~100~74.803~560.519~0&tb303=63~0~2~47~16~2~67~6~2~63~16~2~64~27~2~89~7~2!52.39~100~24~4.23~7.53~85~7.087~0.76~22~0.7
+
+-->
+
+  <w-floating id="transport">
+    <button title="Drag to position" class="no-border">
+      <svg-icon is="drag"></svg-icon>
+    </button>
+    <button title="Play" onmousedown="scheduler.start()">
+      <svg-icon is="play"></svg-icon>
+    </button>
+    <button title="Stop" onmousedown="scheduler.stop()">
+      <svg-icon is="stop"></svg-icon>
+    </button>
+    <button title="Sound On">
+      <svg-icon is="volume"></svg-icon>
+    </button>
+    <button class="no-border" onclick="document.documentElement.requestFullscreen()" title="Fullscreen">
+      <svg-icon is="fullscreen"></svg-icon>
+    </button>
+  </w-floating>
+
+  <w-context id="wa" latency="0.06">
+    <w-scheduler id="scheduler">
+      <w-spacer vertical>
+        <w-audioplugin id="drummera" src="./vendor/drummer.js" onchange="change(this)"></w-audioplugin>
+        <w-audioplugin id="drummerb" src="./vendor/drummer.js" onchange="change(this)"></w-audioplugin>
+        <w-audioplugin id="tb303a" src="./vendor/tb303.js" onchange="change(this)"></w-audioplugin>
+        <w-audioplugin id="tb303b" src="./vendor/tb303.js" onchange="change(this)"></w-audioplugin>
+      </w-spacer>
+    </w-scheduler>
+  </w-context>
+
+  <script type="module">
+    // on space start/stop transport
+
+
+    const fader = (name, ...args) => {
+      return [name, ['fader', ...args].join(',')].join(':')
+    }
+    const knob = (name, ...args) => {
+      return [name, ['knob', ...args].join(',')].join(':')
+    }
+
+    document.querySelectorAll('w-audioplugin').forEach(el => {
+      el.styling = [
+        fader('osc freq'),
+        fader('eq freq'),
+        knob('osc decay', 60, 'soft'),
+        knob('decay', 60, 'hard'),
+        knob('cutoff', 60, 'hard'),
+        knob('pitchbend', 60, 'hard'),
+        knob('Q', 60, 'hard'),
+        knob('eq Q', 60, 'hard', 'octagon'),
+        fader('eq gain'),
+        knob('hpf', 60, 'hard'),
+        fader('saturate'),
+        fader('distort'),
+        fader('sat amount'),
+        fader('sat wet'),
+        fader('dist amount'),
+        fader('dist wet'),
+        knob('env', 95, 'soft'),
+        knob('env amount', 85, 'hard', 'hexagon'),
+        knob('env speed', 85, 'hard', 'dodecagon'),
+      ].join(';')
+    })
+
+    // restore state from hash data
+    if (location.hash) {
+      const parts = location.hash.slice(1).split('&')
+      let noteId = 0
+      for (const part of parts) {
+        const [name, values] = part.split('=')
+        const [grid, params, scrollTop] = values.split('!')
+        const el = document.getElementById(name)
+        if (!el) continue
+        const events = grid.split('~').filter(Boolean).reduce((p, n, i) => {
+          p.push(n)
+          if (i % 3 === 2) {
+            p.push({
+              id: (Math.random() * 10e6 | 0).toString(36),
+              length: +p.pop(),
+              step: +p.pop(),
+              note: +p.pop(),
+            })
+          }
+          return p
+        }, [])
+        el.events = events
+
+        const paramValues = params.split('~').map(parseFloat)
+        el.addEventListener('ready', () => {
+          el.pianoroll.scrollTop = el.pianoroll.scrollHeight * scrollTop
+          el.style.opacity = 1
+          let i = 0
+          for (const [name, p] of el.worklet.audioNode.parameters) {
+            p.value = paramValues[i]
+            i++
+          }
+        }, { once: true })
       }
+    }
 
-      /* param */
+    // save state in url bar on audioplugin change
+    window.change = (e) => {
+      const els = document.querySelectorAll('w-audioplugin')
+      const hash = [...els].map(el => {
+        const events = el.events.map(ev => [ev.note, ev.step, ev.length])
+        const params = [...el.worklet.audioNode.parameters]
+          .map(([name, param]) => parseFloat(param.value.toFixed(4)))
+        return el.id + '=' + events.flat().join('~') +
+          '!' + params.join('~') +
+          '!' + (el.pianoroll.scrollTop / el.pianoroll.scrollHeight).toFixed(3)
+      }).join('&')
+      window.history.replaceState({}, window.title,
+        location.href.split('#')[0] + '#' + hash)
+    }
 
-      w-param {
-        position: relative;
-        display: inline-flex;
-        flex-flow: column wrap;
-        align-items: center;
-        justify-content: center;
-      }
-      w-param::part(param-name) {
-        font-size: 8pt;
-        font-family: sans-serif;
-        font-weight: bold;
-        color: var(--light);
-        margin: 1em;
-      }
-      w-param::part(param-number) {
-        background: var(--black);
-        border: 2px inset var(--black);
-        border-right: 2px inset var(--dark);
-        border-bottom: 2px inset var(--dark);
-        color: var(--white);
-        font-family: monospace;
-        font-size: 8pt;
-        text-align: center;
-      }
-      w-param::part(param-range) {
-        display: none;
-      }
+    // define our web components in dom space
+    // TODO: this should be a helper
+    const define = (ns, elements) =>
+      Promise.all(
+        elements.map(async ([name, src]) => [name, await import(src)])
+      ).then((modules) => modules.map(([name, mod]) =>
+        customElements.define(ns + '-' + name, mod.default)
+      )
+      )
 
-      /* piano */
+    // TODO: local components should define their dependencies in local namespace
+    // for now we use the global namespace because the browser doesn't provide component encapsulation
+    await define('w', [
+      ['floating', './components/floating.js'],
+      ['spacer', './components/spacer.js'],
+      ['tooltip', './components/tooltip.js'],
+      ['context', './components/context.js'],
+      ['worklet', './components/worklet.js'],
+      ['destination', './components/destination.js'],
+      ['param', './components/param.js'],
+      ['knob', './components/knob.js'],
+      ['fader', './components/fader.js'],
+      ['radio', './components/radio.js'],
+      ['piano', './components/piano.js'],
+      ['pianoroll', './components/pianoroll.js'],
+      ['scheduler', './components/scheduler.js'],
+      ['audioplugin', './components/audioplugin.js'],
+    ])
+  </script>
+</body>
 
-      w-piano {
-        flex: 1;
-        width: 100%;
-      }
-      w-piano::part(piano-white) {
-        background: var(--black);
-        border-right: 4px solid var(--black);
-      }
-      w-piano::part(piano-black) {
-        background: var(--grey);
-        border-top: 1.5px solid var(--white);
-        border-left: 1.5px solid var(--white);
-      }
-      w-piano {
-        --pressed-white: var(--grey);
-        --pressed-black: var(--black);
-      }
-
-      @media screen and (max-width: 600px) {
-        w-audioplugin::part(param-group) {
-          min-width: 100%;
-          border-bottom: 10px solid var(--dark);
-        }
-      }
-
-    </style>
-
-    <w-context id="wa">
-      <w-audioplugin src="./vendor/drummer.js"></w-audioplugin>
-      <w-audioplugin src="./vendor/tb303.js"></w-audioplugin>
-
-        <!-- <w-worklet name="noise" src="./noise.js">
-          <div class="worklet-inner">
-          <w-param name="volume" precision="3">
-            <w-knob shape="octagon" size="90"></w-knob>
-            <w-knob shape="hexagon" size="150"></w-knob>
-          </w-param>
-
-          <w-param name="filter" precision="3">
-            <w-fader size="200"></w-fader>
-            <w-knob shape="hexagon" size="75"></w-knob>
-          </w-param>
-
-          <w-param name="volume" precision="3">
-            <w-knob shape="decagon" size="90"></w-knob>
-            <w-knob shape="dodecagon" size="150"></w-knob>
-          </w-param>
-        </div>
-
-        <w-destination></w-destination>
-
-        <w-piano></w-piano>
-      </w-worklet> -->
-    </w-context>
-
-    <script type="module">
-      const define = (ns, elements) =>
-        Promise.all(
-          elements.map(async ([name, src]) => [name, await import(src)])
-        ).then((modules) =>
-          modules.map(([name, mod]) =>
-            customElements.define(ns + '-' + name, mod.default)
-          )
-        )
-
-      await define('w', [
-        ['context', './components/context.js'],
-        ['worklet', './components/worklet.js'],
-        ['destination', './components/destination.js'],
-        ['param', './components/param.js'],
-        ['knob', './components/knob.js'],
-        ['fader', './components/fader.js'],
-        ['radio', './components/radio.js'],
-        ['piano', './components/piano.js'],
-        ['pianoroll', './components/pianoroll.js'],
-        ['audioplugin', './components/audioplugin.js'],
-      ])
-    </script>
-  </body>
 </html>

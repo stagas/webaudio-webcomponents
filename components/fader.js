@@ -25,7 +25,7 @@ export default create({
   component() {
     effect.once(
       () => {
-        this.html = `
+        this.render `
         <style>
           [part=fader-outer] {
             position: relative;
