@@ -401,10 +401,10 @@ http://127.0.0.1:8080/#drummer=62~0~2~62~16~2~62~26~2!0~80.524~17.787~0.63~33~-1
     <button title="Drag to position" class="no-border">
       <svg-icon is="drag"></svg-icon>
     </button>
-    <button title="Play" onmousedown="scheduler.start()">
+    <button title="Play" onmousedown="player.start()">
       <svg-icon is="play"></svg-icon>
     </button>
-    <button title="Stop" onmousedown="scheduler.stop()">
+    <button title="Stop" onmousedown="player.stop()">
       <svg-icon is="stop"></svg-icon>
     </button>
     <button title="Sound On">
@@ -416,7 +416,7 @@ http://127.0.0.1:8080/#drummer=62~0~2~62~16~2~62~26~2!0~80.524~17.787~0.63~33~-1
   </w-floating>
 
   <w-context id="wa" latency="0.06">
-    <w-scheduler id="scheduler">
+    <w-scheduler id="player">
       <w-spacer vertical>
         <w-audioplugin id="drummera" src="./vendor/drummer.js" onchange="change(this)"></w-audioplugin>
         <w-audioplugin id="drummerb" src="./vendor/drummer.js" onchange="change(this)"></w-audioplugin>
@@ -462,6 +462,8 @@ http://127.0.0.1:8080/#drummer=62~0~2~62~16~2~62~26~2!0~80.524~17.787~0.63~33~-1
     })
 
     // restore state from hash data
+    setTimeout(() => {
+
     if (location.hash) {
       const parts = location.hash.slice(1).split('&')
       let noteId = 0
@@ -495,6 +497,7 @@ http://127.0.0.1:8080/#drummer=62~0~2~62~16~2~62~26~2!0~80.524~17.787~0.63~33~-1
         }, { once: true })
       }
     }
+    })
 
     document.querySelectorAll('w-audioplugin').forEach(el => {
       el.addEventListener('ready', () => {
